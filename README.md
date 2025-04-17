@@ -40,11 +40,11 @@ A web application designed to help users manage their personal finances by track
 ### Steps
 1. Clone the repository:
   ```
-  git clone https://github.com/your-username/personal-finance-app.git
-  cd personal-finance-app
+  git clone https://github.com/nataly-projects/personal-finance-app.git
+  cd personal-finance
   ```
 
-2. Create a .env file in the personal-finance-app-server directory and add the following:
+2. Create a .env file in the personal-finance-server directory and add the following:
   ```
   MONGO_URI=your-mongodb-connection-string
   PORT=5000
@@ -55,12 +55,12 @@ A web application designed to help users manage their personal finances by track
 
 - Server Side:
 ```
-cd personal-finance-app-server
+cd personal-finance-server
 npm install
 ```
 - Client Side:
 ```
-cd personal-finance-app-client
+cd personal-finance-client
 npm install
 ```
 
@@ -68,12 +68,12 @@ npm install
 
 - In one terminal window (Server):
 ```
-cd personal-finance-app-server
+cd personal-finance-server
 npm start
 ```
 - In another terminal window (Client):
 ```
-cd personal-finance-app-client
+cd personal-finance-client
 npm start
 ```
 5. Open your browser and navigate to:
