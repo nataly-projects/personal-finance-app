@@ -31,6 +31,7 @@ A web application designed to help users manage their personal finances by track
 - **Database:** MongoDB with Mongoose
 - **Authentication:** JSON Web Token (JWT)
 - **Environment Variables:** dotenv
+- **Logging:** Winston – structured logging for tracking server-side activities and errors
 
 ## Installation
 ### Prerequisites
