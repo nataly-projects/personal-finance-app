@@ -11,9 +11,9 @@ A web application designed to help users manage their personal finances by track
 **Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
 
 **Security**: 
-  - Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
-  - Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
-  - User Registration & Login: Secure sign-up and sign-in flow with validation and session management.
+  - **Authentication**: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
+  - **Environment Variables**: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
+  - **User Registration & Login**: Secure sign-up and sign-in flow with validation and session management.
 
 
 ## **Technologies Used**

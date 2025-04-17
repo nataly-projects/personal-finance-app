@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Typography, Box, CircularProgress, Alert, Button, Dialog, DialogContent } from "@mui/material";
-import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useTransactions } from '../hooks/useTransactions';
 import AddTransactionForm from '../components/AddTransactionForm';
-import AddIcon from '@mui/icons-material/Add';
 import TransactionsTable from '../components/TransactionsTable';
 
 const TransactionsPage: React.FC = () => {
@@ -27,28 +25,21 @@ const TransactionsPage: React.FC = () => {
     }
   };
 
-  // const columns: GridColDef[] = [
-  //   { field: 'amount', headerName: 'Amount', flex: 1,  align: 'center', headerAlign: 'center'  },
-  //   { field: 'category', headerName: 'Category', flex: 1,  align: 'center', headerAlign: 'center'  },
-  //   { field: 'type', headerName: 'Type', flex: 1,  align: 'center', headerAlign: 'center' },
-  //   { 
-  //     field: 'date', 
-  //     headerName: 'Date', 
-  //     flex: 1,
-  //     align: 'center', 
-  //     headerAlign: 'center',
-  //     valueFormatter: (params: GridRenderCellParams) => 
-  //       params ? new Date(params).toLocaleDateString() : 'N/A'
-  //   },
-  //   { 
-  //     field: 'note', 
-  //     headerName: 'Note', 
-  //     flex: 1 ,
-  //     align: 'center', 
-  //     headerAlign: 'center',
-  //     valueGetter: (params: GridRenderCellParams) => params || "-", 
-  //   }
-  // ];
+  const handleEdit = async (id: string) => {
+    try {
+      // Add logic to open an edit dialog or navigate to an edit page
+    } catch (error) {
+      console.error("Error editing transaction:", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      // Add logic to delete the transaction
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -73,35 +64,12 @@ const TransactionsPage: React.FC = () => {
           Transactions
         </Typography>
       </Box>
-      <TransactionsTable transactions={transactions} handleOpenAddDialog={handleOpenAddDialog} />
-
-      {/* <Box sx={{ width: '100%'}}>
-        <DataGrid
-          rows={transactions}
-          columns={columns}
-          getRowId={(row) => row._id}
-          pageSizeOptions={[5, 10, 20, 50]}
-          disableRowSelectionOnClick
-          pagination
-          sx={{
-            '& .MuiDataGrid-row': {
-              '&.income': { backgroundColor: '#e0f2f1' },
-              '&.expense': { backgroundColor: '#e37485' }
-            }
-          }}
-          getRowClassName={(params) => params.row.type}
-        />
-      </Box> */}
-
-      {/* <Button 
-        sx={{mt: 2}}
-        variant="contained" 
-        color="primary" 
-        startIcon={<AddIcon />}
-        onClick={handleOpenAddDialog}
-        >
-        Add Transaction
-      </Button> */}
+      <TransactionsTable 
+      transactions={transactions} 
+      handleOpenAddDialog={handleOpenAddDialog} 
+      handleEdit={handleEdit} 
+      handleDelete={handleDelete} 
+      />
 
       <Dialog open={openAddDialog} onClose={handleCloseAddDialog} maxWidth="sm" fullWidth>
         <DialogContent>

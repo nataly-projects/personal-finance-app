@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Box, Button } from '@mui/material';
+import { DataGrid, GridColDef, GridRenderCellParams, GridAlignment } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Button, IconButton } from '@mui/material';
 import { TransactionsTableProps } from '../utils/types';
 
 
-const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, handleOpenAddDialog }) => {
+const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, handleOpenAddDialog, handleEdit, handleDelete }) => {
     const navigate = useNavigate(); 
     
     const columns: GridColDef[] = [
@@ -28,7 +30,34 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
         align: 'center', 
         headerAlign: 'center',
         valueGetter: (params: GridRenderCellParams) => params || "-", 
-        }
+        },
+        ...(handleOpenAddDialog && handleEdit && handleDelete ? [
+            {
+            field: 'actions',
+            headerName: 'Actions',
+            flex: 1,
+            align: 'center' as GridAlignment,
+            headerAlign: 'center'  as GridAlignment,
+            renderCell: (params: GridRenderCellParams) => (
+                <Box>
+                    <IconButton 
+                        color="primary" 
+                        onClick={() => handleEdit(params.row._id)}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                        color="secondary" 
+                        onClick={() => handleDelete(params.row._id)}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                </Box>
+                )
+            }
+        ] 
+        : []
+    )
     ];
     
   return (
