@@ -1,0 +1,19 @@
+# root
+node_modules/
+.env
+.DS_Store
+dist/
+build/
+*.log
+
+# client
+personal-finance-client/node_modules/
+personal-finance-client/.env
+personal-finance-client/build/
+
+# server
+personal-finance-server/node_modules/
+personal-finance-server/.env
+
+.vscode/
+*.swp
