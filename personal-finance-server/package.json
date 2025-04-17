@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "nodemailer": "^6.9.16",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
