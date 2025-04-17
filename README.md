@@ -5,7 +5,9 @@ A web application designed to help users manage their personal finances by track
 ## **Features**
 
 **Transaction Management**: Add, view, and categorize income and expense transactions.
+
 **Budget Notifications**: Get notified when monthly expenses exceed a predefined limit.
+
 **Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
 
 **Security**: 
@@ -52,31 +54,33 @@ A web application designed to help users manage their personal finances by track
 3. Install dependencies:
 
     Server Side:
-  ```
-  cd personal-finance-app-server
-  npm install
-  ```
+```
+cd personal-finance-app-server
+npm install
+```
 
     Client Side:
-  ```
-  cd personal-finance-app-client
-  npm install
-  ```
+
+```
+cd personal-finance-app-client
+npm install
+```
 
 4. Run the Server and Client:
 
     In one terminal window (Server):
-  ```
-  cd personal-finance-app-server
-  npm start
-  ```
+```
+cd personal-finance-app-server
+npm start
+```
     
     In another terminal window (Client):
-  ```
-  cd personal-finance-app-client
-  npm start
-  ```
+
+```
+cd personal-finance-app-client
+npm start
+```
 5. Open your browser and navigate to:
-  ```
-  http://localhost:3000
-  ```
+```
+http://localhost:3000
+```
