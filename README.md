@@ -6,7 +6,7 @@ A web application designed to help users manage their personal finances by track
 
 **Transaction Management**: Add, view, and categorize income and expense transactions.
 **Budget Notifications**: Get notified when monthly expenses exceed a predefined limit.
-- **Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
+**Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
 **Security**: 
   - Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
   - Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
@@ -37,42 +37,43 @@ A web application designed to help users manage their personal finances by track
 
 ### Steps
 1. Clone the repository:
-```
+  ```
   git clone https://github.com/your-username/personal-finance-app.git
   cd personal-finance-app
-```
+  ```
 
 2. Create a .env file in the personal-finance-app-server directory and add the following:
-```
-MONGO_URI=your-mongodb-connection-string
-PORT=5000
-JWT_SECRET_KEY=your-jwt-secret-key
-```
+  ```
+  MONGO_URI=your-mongodb-connection-string
+  PORT=5000
+  JWT_SECRET_KEY=your-jwt-secret-key
+  ```
 
 3. Install dependencies:
-Server Side:
-```
-cd personal-finance-app-server
-npm install
-```
-Client Side:
-```
-cd personal-finance-app-client
-npm install
-```
+
+  Server Side:
+  ```
+  cd personal-finance-app-server
+  npm install
+  ```
+  Client Side:
+  ```
+  cd personal-finance-app-client
+  npm install
+  ```
 
 4. Run the Server and Client
-In one terminal window (Server):
- ```
-cd personal-finance-app-server
-npm start
-```
-In another terminal window (Client):
- ```
-cd personal-finance-app-client
-npm start
-```
-6. Open your browser and navigate to:
-```
-http://localhost:3000
-```
+  In one terminal window (Server):
+  ```
+  cd personal-finance-app-server
+  npm start
+  ```
+  In another terminal window (Client):
+  ```
+  cd personal-finance-app-client
+  npm start
+  ```
+5. Open your browser and navigate to:
+  ```
+  http://localhost:3000
+  ```
