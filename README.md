@@ -7,6 +7,7 @@ A web application designed to help users manage their personal finances by track
 **Transaction Management**: Add, view, and categorize income and expense transactions.
 **Budget Notifications**: Get notified when monthly expenses exceed a predefined limit.
 **Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
+
 **Security**: 
   - Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
   - Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
@@ -29,7 +30,6 @@ A web application designed to help users manage their personal finances by track
 - **Authentication:** JSON Web Token (JWT)
 - **Environment Variables:** dotenv
 
----
 ## Installation
 ### Prerequisites
  - Ensure you have Node.js and npm installed on your machine.
@@ -51,24 +51,25 @@ A web application designed to help users manage their personal finances by track
 
 3. Install dependencies:
 
-  Server Side:
+    Server Side:
   ```
   cd personal-finance-app-server
   npm install
   ```
-  Client Side:
+    Client Side:
   ```
   cd personal-finance-app-client
   npm install
   ```
 
-4. Run the Server and Client
-  In one terminal window (Server):
+4. Run the Server and Client:
+
+    In one terminal window (Server):
   ```
   cd personal-finance-app-server
   npm start
   ```
-  In another terminal window (Client):
+    In another terminal window (Client):
   ```
   cd personal-finance-app-client
   npm start
