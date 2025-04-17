@@ -56,6 +56,7 @@ A web application designed to help users manage their personal finances by track
   cd personal-finance-app-server
   npm install
   ```
+
     Client Side:
   ```
   cd personal-finance-app-client
@@ -69,6 +70,7 @@ A web application designed to help users manage their personal finances by track
   cd personal-finance-app-server
   npm start
   ```
+    
     In another terminal window (Client):
   ```
   cd personal-finance-app-client
