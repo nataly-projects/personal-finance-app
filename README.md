@@ -53,14 +53,12 @@ A web application designed to help users manage their personal finances by track
 
 3. Install dependencies:
 
-    Server Side:
+- Server Side:
 ```
 cd personal-finance-app-server
 npm install
 ```
-
-    Client Side:
-
+- Client Side:
 ```
 cd personal-finance-app-client
 npm install
@@ -68,14 +66,12 @@ npm install
 
 4. Run the Server and Client:
 
-    In one terminal window (Server):
+- In one terminal window (Server):
 ```
 cd personal-finance-app-server
 npm start
 ```
-    
-    In another terminal window (Client):
-
+- In another terminal window (Client):
 ```
 cd personal-finance-app-client
 npm start
