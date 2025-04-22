@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {useAuth} from '../context/AuthContext';
 import {
   Box,
   Drawer,
@@ -30,6 +31,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -68,9 +70,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Personal Finance Management
-          </Typography>
+          <Box sx={{display: 'flex', alignItems: 'basline', justifyContent: 'space-between', flexGrow: 1}}>
+            <Typography variant="h6" noWrap component="div">
+              Personal Finance Management
+            </Typography>
+          </Box>
+          {user?.fullName && (  
+            <Typography variant="body1" noWrap>
+              {user.fullName}
+            </Typography>
+          )}
         </Toolbar>
       </AppBar>
       <Drawer

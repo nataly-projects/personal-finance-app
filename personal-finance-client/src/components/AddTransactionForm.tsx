@@ -6,7 +6,7 @@ import { TextField, MenuItem, Box, Alert, Button, IconButton, Typography } from 
 import CloseIcon from "@mui/icons-material/Close";
 import API from "../services/api.js";
 import {categories} from "../utils/utils.js";
-import { AddTransactionFormProps, TransactionData, Category, TransactionFormData } from '../utils/types.js';
+import { AddTransactionFormProps, Category, TransactionFormData } from '../utils/types.js';
 
 
 
@@ -18,7 +18,7 @@ const transactionSchema = yup.object().shape({
   description: yup.string().default("").required("Description is required"),
 });
 
-const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, handleClose }) => {
+const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, handleClose, transaction }) => {
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategories, setCustomCategories] = useState<string[]>([...categories]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,6 +29,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm<TransactionFormData>({
     resolver: yupResolver(transactionSchema) as any,
@@ -41,8 +42,19 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
     },
   });
 
+  const selectedCategory = watch("category");
+  const selectedType = watch("type");
+  const selectedDate = watch("date");
   
   useEffect(() => {
+    if (transaction) {
+      // Populate form fields with transaction data
+      setValue("amount", transaction.amount);
+      setValue("category", transaction.category);
+      setValue("type", transaction?.type || "expense");
+      setValue("date", new Date(transaction.date));
+      setValue("description", transaction.description);
+    }
     const fetchCategories = async () => {
       try {
         const response = await API.get<Category[]>("/categories");
@@ -56,7 +68,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
     };
 
     fetchCategories();
-  }, []);
+  }, [transaction, setValue]);
 
   const onSubmit: SubmitHandler<TransactionFormData> = async (data) => {
     try {
@@ -92,7 +104,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
       onSubmit={handleSubmit(onSubmit)} 
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       >
-      <Typography variant="h5" sx={{ mb: 2 }}>Add New Transaction</Typography>
+      <Typography variant="h5" sx={{ mb: 2 }}>        {transaction ? "Update Transaction" : "Add New Transaction"}
+      </Typography>
+  
         
       <IconButton 
         aria-label="close" 
@@ -118,7 +132,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
         error={!!errors.category}
         helperText={errors.category?.message}
         fullWidth
-        defaultValue=""
+        value={selectedCategory}
         onChange={(e) => {
           const value = e.target.value;
           if (value === "add-custom-category") {
@@ -157,6 +171,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
         error={!!errors.type}
         helperText={errors.type?.message}
         fullWidth
+        value={selectedType}
       >
         <MenuItem value="income">Income</MenuItem>
         <MenuItem value="expense">Expense</MenuItem>
@@ -194,7 +209,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
           color="primary" 
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Saving..." : "Add Transaction"}
+          {isSubmitting ? "Saving..." : transaction ? "Update Transaction" : "Add Transaction"}
         </Button>
         
         <Button 

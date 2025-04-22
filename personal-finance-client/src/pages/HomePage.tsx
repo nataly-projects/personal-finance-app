@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import { Box, Typography, Button, Dialog, DialogContent } from "@mui/material";
+import { Box, Typography, Dialog, DialogContent } from "@mui/material";
 import Dashboard from "./Dashboard";
 import AddTransactionForm from "../components/AddTransactionForm";
 import API from "../services/api";
@@ -22,9 +22,6 @@ const HomePage: React.FC = () => {
     fetchTransactions();
   }, []);
 
-  
-  const handleDialogOpen = () => setOpen(true);
-
   const handleDialogClose = () => setOpen(false);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", p: 3 }}>
@@ -32,21 +29,6 @@ const HomePage: React.FC = () => {
         Personal Finance Dashboard
       </Typography>
       <Dashboard />
-      {/* <Button
-        variant="contained"
-        color="primary"
-        sx={{
-          mt: 3,
-          alignSelf: "flex-start",
-          backgroundColor: "#1a73e8",
-          '&:hover': { backgroundColor: "#0059b3" }
-        }}
-        onClick={handleDialogOpen}
-      >
-        Add New Transaction
-      </Button> */}
-
-      
         <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth="sm">
           <DialogContent>
             <AddTransactionForm

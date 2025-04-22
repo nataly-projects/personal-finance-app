@@ -16,9 +16,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null); // null if no user is logged in
+  const [user, setUser] = useState<User | null>(null); 
 
-  // Load user from localStorage on app load
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -26,13 +25,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Log in function
   const login = (userData: User) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
-  // Log out function
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);

@@ -1,5 +1,5 @@
 const Task = require("../models/Task");
-const logger = require('../logger');  
+const logger = require('../../logger');  
 
 async function getUserTasks(req, res) {
   try {
@@ -11,7 +11,7 @@ async function getUserTasks(req, res) {
     const tasks = await Task.find({ userId: req.user.id });
     if (!tasks || tasks.length === 0) {
       logger.info(`No tasks found for user ID: ${req.user.id}`);
-      return res.status(404).json({ message: "No tasks found" });
+      return res.status(200).json([] );
     }
 
     logger.info(`Tasks fetched successfully for user ID: ${req.user.id}`);

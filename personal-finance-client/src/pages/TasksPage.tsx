@@ -26,7 +26,7 @@ const TasksPage: React.FC = () => {
 
   const handleAddTask = async (task: any) => {
     try {
-      await API.post('/users/tasks', task);
+      await API.post('/tasks/', task);
       fetchTasks();
       handleDialogClose();
     } catch (error) {

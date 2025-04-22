@@ -1,5 +1,5 @@
 const Transaction = require("../models/Transaction");
-const logger = require('../logger');
+const logger = require('../../logger');
 
 async function addTransaction (req, res) {
   try {
@@ -38,9 +38,11 @@ async function getTransactions (req, res) {
   try {
     const transactions = await Transaction.find({ userId: req.user.id })
       .sort({ date: -1 }); 
-    
+    if (!transactions || transactions.length === 0) {
+        logger.info(`No transactions found for user ID: ${req.user.id}`);
+        return res.status(200).json([]);
+    }
     logger.info(`Transactions fetched successfully for user ID: ${req.user.id}`);
-
     res.status(200).json(transactions);
   } catch (error) {
     logger.error(`Error fetching transactionsfor user ID: ${req.user.id}:`, error);

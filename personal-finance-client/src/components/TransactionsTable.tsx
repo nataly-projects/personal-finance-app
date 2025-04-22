@@ -5,6 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, IconButton } from '@mui/material';
 import { TransactionsTableProps } from '../utils/types';
+import { ArrowRight as ArrowRightIcon } from '@mui/icons-material';
 
 
 const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, handleOpenAddDialog, handleEdit, handleDelete }) => {
@@ -42,7 +43,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
                 <Box>
                     <IconButton 
                         color="primary" 
-                        onClick={() => handleEdit(params.row._id)}
+                        onClick={() => handleEdit(params.row)}
                     >
                         <EditIcon />
                     </IconButton>
@@ -86,35 +87,44 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
                 />
             </Box>
         </Box>
-        {handleOpenAddDialog ? (
-            <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={handleOpenAddDialog}
-                sx={{
-                    mt: 3,
-                    alignSelf: "flex-start",
-                    backgroundColor: "#1a73e8",
-                    '&:hover': { backgroundColor: "#0059b3" }
-                }}
-                >
-                Add Transaction
-            </Button>
-        )
-        :
-        (
-            <Button
-            variant="text"
-            color="primary"
-            onClick={() => navigate('/transactions')} 
+        <Box
             sx={{
-                mt: 3,
-                alignSelf: 'flex-start',
-                textTransform: 'none',
-            }} >
-            View All Transactions &gt;
-            </Button>  
-        )}
+            display: 'flex', 
+            mt: 3, 
+            justifyContent: handleOpenAddDialog ? 'flex-start' : 'center', 
+            }}
+        >
+            {handleOpenAddDialog ? (
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={handleOpenAddDialog}
+                    sx={{
+                        alignSelf: "flex-start",
+                        backgroundColor: "#1a73e8",
+                        '&:hover': { backgroundColor: "#0059b3" }
+                    }}
+                    >
+                    Add Transaction
+                </Button>
+            )
+            :
+            (
+                <Button
+                variant="text"
+                color="primary"
+                onClick={() => navigate('/transactions')} 
+                sx={{
+                    textTransform: 'none',
+                    color: 'black',
+                    fontSize: '18px',
+                    justifyContent: 'center',
+                }} >
+                View All Transactions 
+                    <ArrowRightIcon />
+                </Button>  
+            )}
+        </Box>
     </Box>
     
   );

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const logger = require('../logger');
+const logger = require('../../logger');
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 

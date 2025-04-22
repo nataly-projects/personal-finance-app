@@ -46,7 +46,7 @@ export interface TransactionData {
 export interface TransactionsTableProps {
   transactions: TransactionData[];
   handleOpenAddDialog?: () => void;
-  handleEdit?: (id: string) => void; 
+  handleEdit?: (transaction: TransactionData) => void; 
   handleDelete?: (id: string) => void;
 }
 
@@ -73,6 +73,7 @@ export interface ExpensesByMonthInYearProps {
 export interface AddTransactionFormProps {
   onSuccess?: (data: any) => void;
   handleClose?: () => void;
+  transaction?: TransactionData | null;
 }
 
 export interface Category {

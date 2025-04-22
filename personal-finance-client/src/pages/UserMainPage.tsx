@@ -1,7 +1,6 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { Box, Toolbar } from "@mui/material";
+import { Box } from "@mui/material";
 import AppRoutes from "../components/AppRoutes";
 
 const UserMainPage: React.FC = () => {
@@ -28,15 +27,6 @@ const UserMainPage: React.FC = () => {
             </Box>
           </Box>
       );
-  return (
-    <Box sx={{ display: "flex" }}>
-      <Sidebar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        <Outlet />
-      </Box>
-    </Box>
-  );
 };
 
 export default UserMainPage;

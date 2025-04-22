@@ -9,6 +9,8 @@ import AddTaskForm from './AddTaskForm';
 import { List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
     const navigate = useNavigate();
@@ -22,8 +24,8 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
     const handleAddTask = async (newTask: TaskFormData) => {
         const taskToSave: Task = { 
             ...newTask, 
-            _id: "", // Temporary ID
-            userId: "", // Will be set by the server
+            _id: "", 
+            userId: "", 
             status: newTask.status || "pending",
             completed: newTask.status === 'completed',
             createdAt: new Date(),
@@ -59,7 +61,7 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
         ));
 
         try {
-            const response = await API.put("/users/tasks", updatedTaskWithStatus);
+            const response = await API.put(`/tasks/${updatedTask._id}`, updatedTaskWithStatus);
         } catch (error) {
             console.error(error);
         }
@@ -71,16 +73,16 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
 
     const handleDelete = async (taskId: string) => {
         try {
-            await API.delete(`/users/tasks/${taskId}`);
-            // Refresh tasks after deletion
+            await API.delete(`/tasks/${taskId}`);
+            
             window.location.reload();
         } catch (error) {
             console.error('Error deleting task:', error);
         }
     };
 
-    const handleEdit = (taskId: string) => {
-        // Implement edit functionality
+    const handleEdit = async (taskId: string) => {
+        await API.put(`/tasks/${taskId}`);
         console.log('Edit task:', taskId);
     };
 
@@ -113,13 +115,21 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                                         {task.dueDate && (
                                             <Typography component="span" variant="body2" color="text.secondary">
                                                 {' - Due: '}
-                                                {task.dueDate.toLocaleDateString()}
+                                                {new Date(task.dueDate).toLocaleDateString()}
                                             </Typography>
                                         )}
                                     </>
                                 }
                             />
                             <ListItemSecondaryAction>
+                                <IconButton
+                                    edge="end"
+                                    aria-label="toggle complete"
+                                    onClick={() => handleToggleComplete(task)}
+                                >
+                                    {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
+                                </IconButton>
+
                                 <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(task._id)}>
                                     <EditIcon />
                                 </IconButton>

@@ -1,6 +1,6 @@
 const Category = require("../models/Category.js");
 const User = require("../models/User");
-const logger = require('../logger.js');
+const logger = require('../../logger.js');
 
 async function addCategory (req, res) {
   try {
