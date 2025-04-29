@@ -12,7 +12,8 @@ const TaskSchema = new Schema({
   description: { type: String, required: true },
   completed: { type: Boolean, default: false },
   dueDate: { type: Date },
-  createdAt: { type: Date, default: Date.now() }
+  createdAt: { type: Date, default: Date.now() },
+  updatedAt: { type: Date}
 });
 
 module.exports = mongoose.model('Task', TaskSchema);

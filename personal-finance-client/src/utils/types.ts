@@ -32,6 +32,7 @@ export interface DashboardData {
   balance: number;
   expensesByCategory: { [key: string]: number };
   recentTransactions: TransactionData[];
+  tasks: Task[];
 }
 
 export interface TransactionData {

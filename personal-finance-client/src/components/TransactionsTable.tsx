@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DataGrid, GridColDef, GridRenderCellParams, GridAlignment } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import { TransactionsTableProps } from '../utils/types';
 import { ArrowRight as ArrowRightIcon } from '@mui/icons-material';
 
@@ -110,19 +110,20 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
             )
             :
             (
-                <Button
-                variant="text"
-                color="primary"
-                onClick={() => navigate('/transactions')} 
-                sx={{
-                    textTransform: 'none',
-                    color: 'black',
-                    fontSize: '18px',
-                    justifyContent: 'center',
-                }} >
-                View All Transactions 
-                    <ArrowRightIcon />
-                </Button>  
+                <Box 
+                    sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        cursor: 'pointer', 
+                    }} 
+                    onClick={() => navigate('/transactions')}
+                >
+                    <Typography variant="h6" >View all Transactions</Typography>
+                    <IconButton >
+                        <ArrowRightIcon />
+                    </IconButton>
+                </Box>
             )}
         </Box>
     </Box>

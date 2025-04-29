@@ -2,13 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import { IconButton, Typography, Box, Dialog, DialogContent } from '@mui/material';
 import { Add as AddIcon, ArrowRight as ArrowRightIcon } from '@mui/icons-material';
-import TaskItem from './TaskItem';
 import { TaskListProps, Task, TaskFormData } from '../utils/types';
 import API from "../services/api";
 import AddTaskForm from './AddTaskForm';
-import { List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { List, ListItem, ListItemText } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
@@ -71,31 +68,17 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
         navigate('/tasks');
     };
 
-    const handleDelete = async (taskId: string) => {
-        try {
-            await API.delete(`/tasks/${taskId}`);
-            
-            window.location.reload();
-        } catch (error) {
-            console.error('Error deleting task:', error);
-        }
-    };
-
-    const handleEdit = async (taskId: string) => {
-        await API.put(`/tasks/${taskId}`);
-        console.log('Edit task:', taskId);
-    };
-
     return (
-        <Box sx={{ padding: 2, width: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff',
-            border: '1px solid #ccc', justifyContent: 'space-between', flex: '1' }}>
-
+        <Box sx={{ padding: 2, display: 'flex', flexDirection: 'column', backgroundColor: '#fff',
+            justifyContent: 'space-between', flex: '1' }}>
+                        
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                <Typography variant="h5">Active Tasks: To-Dos</Typography>
+                <Typography variant="h6">Open Tasks</Typography>
                 <IconButton onClick={handleAddTaskClick} color="primary">
                     <AddIcon />
                 </IconButton>
             </Box>
+
 
             <List>
                 {tasks.length === 0 ? (
@@ -105,6 +88,14 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                 ) : (
                     tasks.map((task) => (
                         <ListItem key={task._id} divider>
+                              <IconButton
+                              sx={{ marginRight: 2 }}
+                                    edge="end"
+                                    aria-label="toggle complete"
+                                    onClick={() => handleToggleComplete(task)}
+                                >
+                                    {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
+                                </IconButton>
                             <ListItemText
                                 primary={task.title}
                                 secondary={
@@ -120,23 +111,7 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                                         )}
                                     </>
                                 }
-                            />
-                            <ListItemSecondaryAction>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="toggle complete"
-                                    onClick={() => handleToggleComplete(task)}
-                                >
-                                    {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
-                                </IconButton>
-
-                                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(task._id)}>
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(task._id)}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </ListItemSecondaryAction>
+                            /> 
                         </ListItem>
                     ))
                 )}

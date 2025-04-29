@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Dialog,  DialogContent } from '@mui/material';
-import TaskList from '../components/TaskList';
 import AddTaskForm from '../components/AddTaskForm';
 import API from '../services/api';
+import TasksTable from '../components/TasksTable';
+import {Task} from '../utils/types';
 
 const TasksPage: React.FC = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [open, setOpen] = useState(false);
 
   const fetchTasks = async () => {
@@ -34,6 +35,41 @@ const TasksPage: React.FC = () => {
     }
   };
 
+  const handleDelete = async (taskId: string) => {
+    try {
+        await API.delete(`/tasks/${taskId}`);
+        
+        window.location.reload();
+    } catch (error) {
+        console.error('Error deleting task:', error);
+    }
+  };
+  
+  const handleEdit = async (taskId: string) => {
+    await API.put(`/tasks/${taskId}`);
+    console.log('Edit task:', taskId);
+  };
+
+  const handleToggleComplete = async (updatedTask: Task) => {
+    const newStatus: 'pending' | 'completed' = updatedTask.status === 'completed' ? 'pending' : 'completed';
+    const updatedTaskWithStatus: Task = { 
+        ...updatedTask, 
+        status: newStatus,
+        completed: newStatus === 'completed',
+        updatedAt: new Date()
+    };
+    
+    setTasks(tasks.map(task =>
+        task._id === updatedTask._id ? updatedTaskWithStatus : task
+    ));
+  
+    try {
+      const response = await API.put(`/tasks/${updatedTask._id}`, updatedTaskWithStatus);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
@@ -47,7 +83,12 @@ const TasksPage: React.FC = () => {
       >
         Add New Task
       </Button>
-      <TaskList propTasks={tasks} />
+      <TasksTable
+        tasks={tasks}
+        onToggleComplete={handleToggleComplete}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
       <Dialog open={open} onClose={handleDialogClose}>
         <DialogContent>
           <AddTaskForm

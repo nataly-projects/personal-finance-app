@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Grid,
   Paper,
@@ -24,9 +25,10 @@ import {
 import API from '../services/api';
 import TransactionsTable from '../components/TransactionsTable';
 import {DashboardData} from '../utils/types.js';
-
+import TaskList from '../components/TaskList';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
@@ -38,6 +40,9 @@ const Dashboard: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await API.get('/users/dashboard');
+        if(!response.data) {
+          throw new Error('No data received from the server');
+        }
         setDashboardData(response.data);
         processData(response.data);
       } catch (error) {
@@ -100,6 +105,7 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
@@ -110,6 +116,7 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
+
         <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
@@ -172,36 +179,19 @@ const Dashboard: React.FC = () => {
               Recent Transactions
             </Typography>
             <TransactionsTable transactions={dashboardData.recentTransactions}  />
-            {/* <Box sx={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Date</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Description</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Category</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Amount</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dashboardData.recentTransactions.map((transaction) => (
-                    <tr key={transaction._id}>
-                      <td style={{ padding: '12px' }}>
-                        {new Date(transaction.date).toLocaleDateString('en-US')}
-                      </td>
-                      <td style={{ padding: '12px' }}>{transaction.description}</td>
-                      <td style={{ padding: '12px' }}>{transaction.category}</td>
-                      <td style={{ padding: '12px' }}>${transaction.amount.toLocaleString()}</td>
-                      <td style={{ padding: '12px' }}>
-                        {transaction.type === 'income' ? 'Income' : 'Expense'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box> */}
           </Paper>
         </Grid>
+
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            {dashboardData.tasks.length > 0 ? (
+              <TaskList propTasks={dashboardData.tasks} />
+            ) : (
+              <Typography>No open tasks</Typography>
+            )}
+          </Paper>
+        </Grid>
+
       </Grid>
     </Box>
   );

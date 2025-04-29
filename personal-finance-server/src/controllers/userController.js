@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const logger = require('../../logger');
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
+const Task = require("../models/Task");
 
 async function registerUser (req, res) {
   const { email, password, fullName } = req.body;
@@ -106,8 +107,13 @@ async function getUserProfile (req, res) {
 };
 
 async function getUserDashboard (req, res) {
+  const userId = req.user.id;
   try {
-    const transactions = await Transaction.find({ userId: req.user.id });
+    const transactions = await Transaction.find({ userId});
+
+    const openTasks = await Task.find({ userId, completed: false }) 
+      .sort({ dueDate: 1 }) 
+      .limit(5);
     
     const totalIncome = transactions
       .filter(t => t.type === "income")
@@ -127,16 +133,17 @@ async function getUserDashboard (req, res) {
         return acc;
       }, {});
     
-    logger.info(`Dashboard data fetched for user ID: ${req.user.id}`);
+    logger.info(`Dashboard data fetched for user ID: ${userId}`);
     res.status(200).json({
       totalIncome,
       totalExpenses,
       balance: totalIncome - totalExpenses,
       expensesByCategory,
-      recentTransactions: transactions.slice(-5).reverse()
+      recentTransactions: transactions.slice(-5).reverse(),
+      tasks: openTasks
     });
   } catch (error) {
-    logger.error(`Error fetching dashboard data for user ID: ${req.user.id}:`, error);
+    logger.error(`Error fetching dashboard data for user ID: ${userId}:`, error);
     res.status(500).json({ message: "Server error, please try again later" });
   }
 };
