@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { IconButton, Typography, Box, Dialog, DialogContent } from '@mui/material';
 import { Add as AddIcon, ArrowRight as ArrowRightIcon } from '@mui/icons-material';
 import { TaskListProps, Task, TaskFormData } from '../utils/types';
-import API from "../services/api";
 import AddTaskForm from './AddTaskForm';
 import { List, ListItem, ListItemText } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import { useTasks } from '../hooks/useTasks';
 
 const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
+    const { addTask, updateTask } = useTasks();
     const navigate = useNavigate();
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]); 
     const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -26,41 +27,32 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
             status: newTask.status || "pending",
             completed: newTask.status === 'completed',
             createdAt: new Date(),
-            updatedAt: new Date()
-        };
+            updatedAt: null};
         try {
-            const response = await API.post("/users/tasks", taskToSave);
-            setTasks([...tasks, response.data]);
+            const savedTask = await addTask(taskToSave); 
+            setTasks((prev) => [...prev, savedTask]); 
+            setIsAddTaskDialogOpen(false);
         } catch (error) {
             console.error(error);
         }
     };
 
-    const handleDialogClose = () => {
-        setIsAddTaskDialogOpen(false);
-    };
 
-    const handleAddTaskClick = () => {
-        setIsAddTaskDialogOpen(true);
-    };
-
-    const handleToggleComplete = async (updatedTask: Task) => {
-        const newStatus: 'pending' | 'completed' = updatedTask.status === 'completed' ? 'pending' : 'completed';
-        const updatedTaskWithStatus: Task = { 
-            ...updatedTask, 
-            status: newStatus,
-            completed: newStatus === 'completed',
+    const handleToggleComplete = async (task: Task) => {
+        const updatedTask = {
+            ...task,
+            completed: !task.completed,
+            status: task.completed ? 'pending' : 'completed',
             updatedAt: new Date()
         };
-        
-        setTasks(tasks.map(task =>
-            task._id === updatedTask._id ? updatedTaskWithStatus : task
-        ));
 
         try {
-            const response = await API.put(`/tasks/${updatedTask._id}`, updatedTaskWithStatus);
+            await updateTask(task._id, updatedTask);
+            setTasks((prev) =>
+                prev.map((t) => (t._id === task._id ? updatedTask : t)) 
+              );
         } catch (error) {
-            console.error(error);
+            console.error('Error toggling task completion:', error);
         }
     };
 
@@ -74,7 +66,7 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                         
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                 <Typography variant="h6">Open Tasks</Typography>
-                <IconButton onClick={handleAddTaskClick} color="primary">
+                <IconButton onClick={() => setIsAddTaskDialogOpen(true)} color="primary">
                     <AddIcon />
                 </IconButton>
             </Box>
@@ -131,12 +123,11 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                     <ArrowRightIcon />
                 </IconButton>
             </Box>
-            <Dialog open={isAddTaskDialogOpen} onClose={handleDialogClose}>
+            <Dialog open={isAddTaskDialogOpen} onClose={() => setIsAddTaskDialogOpen(false)} maxWidth="sm" fullWidth>
                 <DialogContent>
-                    <AddTaskForm 
-                        open={isAddTaskDialogOpen} 
+                    <AddTaskForm  
                         onSave={handleAddTask} 
-                        onClose={handleDialogClose} 
+                        onClose={() => setIsAddTaskDialogOpen(false)} 
                     />
                 </DialogContent>
             </Dialog>

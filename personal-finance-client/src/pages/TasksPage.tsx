@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog,  DialogContent } from '@mui/material';
+import { Box, Typography, Button, Dialog,  DialogContent, CircularProgress, Alert } from '@mui/material';
 import AddTaskForm from '../components/AddTaskForm';
-import API from '../services/api';
 import TasksTable from '../components/TasksTable';
 import {Task} from '../utils/types';
+import {useTasks} from '../hooks/useTasks';
 
 const TasksPage: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [open, setOpen] = useState(false);
+  const { tasks, loading, error, addTask, updateTask, deleteTask } = useTasks();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await API.get('/tasks');
-      setTasks(response.data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const handleDialogOpen = () => setOpen(true);
-  const handleDialogClose = () => setOpen(false);
-
+  const handleDialogOpen = () => setOpenDialog(true);
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setSelectedTask(null);
+  }
   const handleAddTask = async (task: any) => {
     try {
-      await API.post('/tasks/', task);
-      fetchTasks();
+      if(selectedTask) {
+        console.log("Updating task:", selectedTask._id);
+        await updateTask(selectedTask._id, task);
+      }
+      else {
+        await addTask(task);
+      }
       handleDialogClose();
     } catch (error) {
       console.error('Error adding task:', error);
@@ -37,64 +32,72 @@ const TasksPage: React.FC = () => {
 
   const handleDelete = async (taskId: string) => {
     try {
-        await API.delete(`/tasks/${taskId}`);
-        
-        window.location.reload();
+      const confirm = window.confirm("Are you sure you want to delete this task?");
+      if (!confirm) return;
+      await deleteTask(taskId);
+      window.alert("Task deleted successfully!");
+      window.location.reload();
     } catch (error) {
         console.error('Error deleting task:', error);
     }
   };
   
-  const handleEdit = async (taskId: string) => {
-    await API.put(`/tasks/${taskId}`);
-    console.log('Edit task:', taskId);
+  const handleEdit = async (task: Task) => {
+    setSelectedTask(task);
+    setOpenDialog(true);
+   
   };
 
-  const handleToggleComplete = async (updatedTask: Task) => {
-    const newStatus: 'pending' | 'completed' = updatedTask.status === 'completed' ? 'pending' : 'completed';
-    const updatedTaskWithStatus: Task = { 
-        ...updatedTask, 
-        status: newStatus,
-        completed: newStatus === 'completed',
-        updatedAt: new Date()
+  const handleToggleComplete = async (task: Task) => {
+    const updatedTask = {
+      ...task,
+      completed: !task.completed,
+      status: task.completed ? 'pending' : 'completed',
+      updatedAt: new Date()
     };
-    
-    setTasks(tasks.map(task =>
-        task._id === updatedTask._id ? updatedTaskWithStatus : task
-    ));
-  
+   
     try {
-      const response = await API.put(`/tasks/${updatedTask._id}`, updatedTaskWithStatus);
+      await updateTask(task._id, updatedTask);
     } catch (error) {
-      console.error(error);
+      console.error('Error toggling task completion:', error);
     }
   };
+
+    if (loading) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+  
+    if (error) {
+      return (
+        <Box sx={{ p: 3 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      );
+    }
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
         Tasks
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleDialogOpen}
-        sx={{ mb: 3 }}
-      >
-        Add New Task
-      </Button>
+
       <TasksTable
         tasks={tasks}
         onToggleComplete={handleToggleComplete}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        handleOpenAddDialog={handleDialogOpen}
       />
-      <Dialog open={open} onClose={handleDialogClose}>
+      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <DialogContent>
           <AddTaskForm
-            open={open}
             onSave={handleAddTask}
             onClose={handleDialogClose}
+            task={selectedTask}
           />
         </DialogContent>
       </Dialog>

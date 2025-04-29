@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { IconButton, Box } from '@mui/material';
+import { IconButton, Box, Button } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,12 +10,13 @@ import { Task } from '../utils/types';
 interface TasksTableProps {
   tasks: Task[];
   onToggleComplete: (task: Task) => void;
-  onEdit: (taskId: string) => void;
+  onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
+  handleOpenAddDialog?: () => void;
 }
 
-const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit, onDelete }) => {
-    console.log('tasks: ', tasks);
+const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit, onDelete, handleOpenAddDialog }) => {
+    
   const columns: GridColDef[] = [
     {
         field: 'completed',
@@ -61,7 +62,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
         align: 'center', 
         renderCell: (params) => (
             <Box>
-            <IconButton onClick={() => onEdit(params.row._id)}>
+            <IconButton onClick={() => onEdit(params.row)}>
                 <EditIcon />
             </IconButton>
             <IconButton onClick={() => onDelete(params.row._id)}>
@@ -86,6 +87,29 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
         pageSizeOptions={[5, 10, 20, 50]}
         disableRowSelectionOnClick
       />
+      <Box
+        sx={{
+        display: 'flex', 
+        mt: 3, 
+        justifyContent:'flex-start'
+        }}
+      >
+       {handleOpenAddDialog && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenAddDialog}
+            sx={{
+              alignSelf: 'flex-start',
+              backgroundColor: '#1a73e8',
+              '&:hover': { backgroundColor: '#0059b3' },
+            }}
+          >
+            Add Task
+          </Button>
+        )}
+      </Box>
+
     </Box>
   );
 };

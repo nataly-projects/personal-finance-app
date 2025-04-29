@@ -4,11 +4,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { TextField, MenuItem, Box, Alert, Button, IconButton, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import API from "../services/api.js";
-import {categories} from "../utils/utils.js";
-import { AddTransactionFormProps, Category, TransactionFormData } from '../utils/types.js';
-
-
+import { AddTransactionFormProps, TransactionFormData } from '../utils/types.js';
+import {useCategories} from "../hooks/useCategories";
 
 const transactionSchema = yup.object().shape({
   amount: yup.number().required("Amount is required").positive("Amount must be positive"),
@@ -19,8 +16,8 @@ const transactionSchema = yup.object().shape({
 });
 
 const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, handleClose, transaction }) => {
+  const { categories, loading: categoriesLoading, error: categoriesError, addCategory } = useCategories(); 
   const [isCustomCategory, setIsCustomCategory] = useState(false);
-  const [customCategories, setCustomCategories] = useState<string[]>([...categories]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,38 +45,30 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
   
   useEffect(() => {
     if (transaction) {
-      // Populate form fields with transaction data
       setValue("amount", transaction.amount);
       setValue("category", transaction.category);
       setValue("type", transaction?.type || "expense");
       setValue("date", new Date(transaction.date));
       setValue("description", transaction.description);
     }
-    const fetchCategories = async () => {
-      try {
-        const response = await API.get<Category[]>("/categories");
-        const userCategories = response.data.map((category) => category.name);
-        const combinedCategories = Array.from(new Set<string>([...customCategories, ...userCategories]));
-        setCustomCategories(combinedCategories);     
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setError("Failed to load categories. Please try again.");
-      }
-    };
-
-    fetchCategories();
   }, [transaction, setValue]);
 
   const onSubmit: SubmitHandler<TransactionFormData> = async (data) => {
     try {
       setIsSubmitting(true);
-      setError(null);
-      // await API.post("/transactions", data);
-      // reset();
+      if (categories.includes(data.category) && isCustomCategory) {
+        setError("Invalid new category. Please enter another category.");
+        return;
+      }
+  
+      if (isCustomCategory && data.category) {
+        addCategory(data.category); 
+      }
+
       if (onSuccess) {
         onSuccess(data);
       }
-      
+      setError(null);
       reset();
     } catch (err) {
       console.error("Error adding transaction:", err);
@@ -144,7 +133,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
           }
         }}
       >
-        {customCategories.map((category) => (
+        {categories.map((category) => (
           <MenuItem key={category} value={category}>
             {category}
           </MenuItem>

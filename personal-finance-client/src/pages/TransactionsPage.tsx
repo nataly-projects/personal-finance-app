@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Typography, Box, CircularProgress, Alert, Button, Dialog, DialogContent } from "@mui/material";
+import { Typography, Box, CircularProgress, Alert, Dialog, DialogContent } from "@mui/material";
 import { useTransactions } from '../hooks/useTransactions';
 import AddTransactionForm from '../components/AddTransactionForm';
 import TransactionsTable from '../components/TransactionsTable';
 import { TransactionData } from '../utils/types';
 
 const TransactionsPage: React.FC = () => {
-  const { transactions, loading, error, addTransaction } = useTransactions();
+  const { transactions, loading, error, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
 
@@ -22,9 +22,8 @@ const TransactionsPage: React.FC = () => {
   const handleAddTransaction = async (transactionData: any) => {
     try {
       if (selectedTransaction) {
-        // Update transaction logic
         console.log("Updating transaction:", selectedTransaction._id);
-        // Call the updateTransaction function here
+        await updateTransaction(selectedTransaction._id, transactionData); 
       } else {
         await addTransaction(transactionData);
       }
@@ -35,20 +34,15 @@ const TransactionsPage: React.FC = () => {
   };
 
   const handleEdit = async (transaction: TransactionData) => {
-    try {
-      console.log("Editing transaction with ID:", transaction);
-      setSelectedTransaction(transaction);
-      setOpenAddDialog(true);
-    } catch (error) {
-      console.error("Error editing transaction:", error);
-    }
+    setSelectedTransaction(transaction);
+    setOpenAddDialog(true);
   };
 
   const handleDelete = async (id: string) => {
     try {
       const confirm = window.confirm("Are you sure you want to delete this transaction?");
-    if (!confirm) return;
-      // Add logic to delete the transaction
+      if (!confirm) return;
+      await deleteTransaction(id);
     } catch (error) {
       console.error("Error deleting transaction:", error);
     }

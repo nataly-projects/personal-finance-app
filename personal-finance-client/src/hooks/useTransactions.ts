@@ -12,14 +12,12 @@ export const useTransactions = () => {
       try {
         setLoading(true);
         const response = await API.get('/transactions');
-        console.log('Transactions response:', response);
         
-        // המרת התאריכים לאובייקטי Date
         const transactionsWithDates = response.data.map((transaction: any) => ({
           ...transaction,
           date: new Date(transaction.date),
           createdAt: new Date(transaction.createdAt),
-          updatedAt: new Date(transaction.updatedAt)
+          updatedAt: transaction.updatedAt ? new Date(transaction.updatedAt) : null
         }));
         
         setTransactions(transactionsWithDates);
@@ -38,12 +36,11 @@ export const useTransactions = () => {
   const addTransaction = async (transaction: Omit<TransactionData, '_id'>) => {
     try {
       const response = await API.post('/transactions', transaction);
-      // המרת התאריכים לאובייקטי Date
       const newTransaction = {
         ...response.data,
         date: new Date(response.data.date),
         createdAt: new Date(response.data.createdAt),
-        updatedAt: new Date(response.data.updatedAt)
+        updatedAt: response.data.updatedAt? new Date(response.data.updatedAt) : null
       };
       setTransactions(prev => [...prev, newTransaction]);
       return newTransaction;
@@ -57,12 +54,11 @@ export const useTransactions = () => {
   const updateTransaction = async (id: string, transaction: Partial<TransactionData>) => {
     try {
       const response = await API.put(`/transactions/${id}`, transaction);
-      // המרת התאריכים לאובייקטי Date
       const updatedTransaction = {
         ...response.data,
         date: new Date(response.data.date),
         createdAt: new Date(response.data.createdAt),
-        updatedAt: new Date(response.data.updatedAt)
+        updatedAt: response.data.updatedAt ? new Date(response.data.updatedAt) : null
       };
       setTransactions(prev => prev.map(t => t._id === id ? updatedTransaction : t));
       return updatedTransaction;

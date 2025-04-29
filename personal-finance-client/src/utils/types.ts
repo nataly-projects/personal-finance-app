@@ -117,11 +117,11 @@ export interface Task {
   userId: string;
   title: string;
   description: string;
-  dueDate?: Date;
-  status: 'pending' | 'completed';
+  dueDate?: Date | null;
+  status: string |'pending' | 'completed';
   completed: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 }
 
 export interface TaskItemProps {
@@ -146,14 +146,14 @@ export interface TransactionFormData {
 export interface TaskFormData {
   title: string;
   description: string;
-  dueDate?: Date;
+  dueDate?: Date | null;
   status: 'pending' | 'completed';
 }
 
 export interface AddTaskFormProps {
-  open: boolean;
   onClose: () => void;
   onSave: (data: TaskFormData) => void;
+  task?: Task | null;
 }
 
 // export interface FilterSectionProps {
