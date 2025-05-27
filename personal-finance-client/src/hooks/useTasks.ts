@@ -1,92 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/store';
+import { 
+  setTasks, 
+  addTask, 
+  updateTask, 
+  deleteTask,
+  setLoading,
+  setError,
+  setOperationLoading
+} from '../store/tasksSlice';
+import {Task} from '../utils/types'
 import API from '../services/api';
-import { Task } from '../utils/types';
+
+const parseTaskDates = (task: Task): Task => ({
+  ...task,
+  dueDate: task.dueDate ? new Date(task.dueDate) : null
+});
 
 export const useTasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const { items: tasks, loading, error, operationLoading } = useSelector((state: RootState) => state.tasks);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response = await API.get('/tasks');
+      dispatch(setTasks(response.data));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error loading tasks';
+      dispatch(setError(errorMessage));
+      setLocalError(errorMessage);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }, [dispatch]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        setLoading(true);
-        const response = await API.get('/tasks');
-        const tasksWithDates = response.data.map((task: any) => ({
-          ...task,
-          dueDate: new Date(task.dueDate),
-          createdAt: new Date(task.createdAt),
-          updatedAt: new Date(task.updatedAt),
-        }));
-        setTasks(tasksWithDates);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching tasks:', err);
-        setError('Failed to load tasks. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTasks();
-  }, []);
+  }, [fetchTasks]);
 
-  const addTask = async (task: Omit<Task, '_id'>) => {
+  const addNewTask = async (taskData: Omit<Task, '_id'>) => {
     try {
-      const response = await API.post('/tasks', task);
-      const newTask = {
-        ...response.data,
-        dueDate: new Date(response.data.dueDate),
-        createdAt: new Date(response.data.createdAt),
-        updatedAt: new Date(response.data.updatedAt),
-      };
-      setTasks((prev) => [...prev, newTask]);
-      return newTask;
+      dispatch(setOperationLoading({ operation: 'add', loading: true }));
+      dispatch(setError(null));
+      const response = await API.post('/tasks', taskData);
+      dispatch(addTask(response.data));
+      return response.data;
     } catch (err) {
-      console.error('Error adding task:', err);
-      setError('Failed to add task. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Error adding task';
+      dispatch(setError(errorMessage));
+      setLocalError(errorMessage);
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'add', loading: false }));
     }
   };
 
-  const updateTask = async (id: string, updatedTask: Partial<Task>) => {
+  const updateExistingTask = async (taskId: string, taskData: Partial<Task>) => {
     try {
-      const response = await API.put(`/tasks/${id}`, updatedTask);
-      const updatedTaskWithDates = {
-        ...response.data,
-        dueDate: new Date(response.data.dueDate),
-        createdAt: new Date(response.data.createdAt),
-        updatedAt: new Date(response.data.updatedAt),
-      };
-      setTasks((prev) =>
-        prev.map((task) => (task._id === id ? updatedTaskWithDates : task))
-      );
-      return updatedTaskWithDates;
+      dispatch(setOperationLoading({ operation: 'update', loading: true }));
+      dispatch(setError(null));
+      const response = await API.put(`/tasks/${taskId}`, taskData);
+      dispatch(updateTask(response.data));
+      return response.data;
     } catch (err) {
-      console.error('Error updating task:', err);
-      setError('Failed to update task. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Error updating task';
+      dispatch(setError(errorMessage));
+      setLocalError(errorMessage);
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'update', loading: false }));
     }
   };
 
-  // Delete a task
-  const deleteTask = async (id: string) => {
+  const deleteExistingTask = async (taskId: string) => {
     try {
-      await API.delete(`/tasks/${id}`);
-      setTasks((prev) => prev.filter((task) => task._id !== id));
+      dispatch(setOperationLoading({ operation: 'delete', loading: true }));
+      dispatch(setError(null));
+      await API.delete(`/tasks/${taskId}`);
+      dispatch(deleteTask(taskId));
     } catch (err) {
-      console.error('Error deleting task:', err);
-      setError('Failed to delete task. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Error deleting task';
+      dispatch(setError(errorMessage));
+      setLocalError(errorMessage);
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'delete', loading: false }));
     }
   };
+
+  const parsedTasks = tasks.map(parseTaskDates);
 
   return {
-    tasks,
+    tasks: parsedTasks,
     loading,
-    error,
-    addTask,
-    updateTask,
-    deleteTask,
+    error: error || localError,
+    operationLoading,
+    addTask: addNewTask,
+    updateTask: updateExistingTask,
+    deleteTask: deleteExistingTask,
+    refreshTasks: fetchTasks
   };
 };

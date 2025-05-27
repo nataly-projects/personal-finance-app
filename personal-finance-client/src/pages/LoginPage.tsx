@@ -1,26 +1,22 @@
-import React, {useContext} from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { TextField, Button, Box } from "@mui/material";
-import API from "../services/api";
-import { AuthContext } from "../context/AuthContext";
+import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { LoginFormData } from "../utils/types";
+import { useAuth } from "../hooks/useAuth";
+import ForgotPasswordDialog from "../components/ForgotPasswordDialog";
 
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup.string().min(3, "Password must be at least 3 characters").required("Password is required"),
 });
 
-const LoginPage = () => {
-  const auth = useContext(AuthContext); 
-  
-  if (!auth) {
-    throw new Error("AuthContext is not provided. Please wrap the app with AuthProvider.");
-  }
-  const { login } = auth;
+const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => void }) => {
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = React.useState(false);
 
   const {
     register,
@@ -32,12 +28,13 @@ const LoginPage = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await API.post("/users/login", data);
-      console.log(response);
-      login(response.data.user); 
-      localStorage.setItem("token", response.data.token); 
-      navigate("/");
-      alert("Login successful!");
+      const result = await login(data.email, data.password);
+      if (result.success) {
+        navigate("/");
+        alert("Login successful!");
+      } else {
+        alert(result.error || "Login failed.");
+      }
     } catch (error) {
       console.error(error);
       alert("Login failed.");
@@ -45,43 +42,95 @@ const LoginPage = () => {
   };
 
   return (
-    <Box
-    component="form"
-    onSubmit={handleSubmit(onSubmit)}
-    sx={{
-      maxWidth: 400,
-      mx: "auto",
-      mt: 5,
-      display: "flex",
-      flexDirection: "column",
-      gap: 2, 
-    }} > 
-      <TextField
-        label="Email"
-        {...register("email")}
-        error={!!errors.email}
-        helperText={errors.email?.message}
-        fullWidth
-        required
-      />
-      <TextField
-        label="Password"
-        type="password"
-        {...register("password")}
-        error={!!errors.password}
-        helperText={errors.password?.message}
-        fullWidth
-        required
-      />
-      <Button 
-      type="submit" 
-      variant="contained" 
-      color="primary" 
-      sx={{ width: "fit-content"}}
+    <>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{
+          maxWidth: 400,
+          mx: "auto",
+          mt: 5,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          border: '1px solid #795B4A',
+          borderRadius: '10px',
+          padding: '20px',
+        }}
       >
-        Login
-      </Button>
-    </Box>
+        <Typography 
+          variant="h6" 
+          gutterBottom 
+          sx={{ 
+            color: '#795B4A',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            mb: 3
+          }}
+        >
+          Welcome back to Personal Finance
+        </Typography>
+
+        <TextField
+          label="Email"
+          {...register("email")}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+          fullWidth
+          required
+        />
+        <TextField
+          label="Password"
+          type="password"
+          {...register("password")}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          fullWidth
+          required
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ width: "fit-content" }}
+        >
+          Sign In
+        </Button>
+
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          gap: 1,
+          mt: 2 
+        }}>
+          <Link
+            component="button"
+            variant="body2"
+            onClick={() => setIsForgotPasswordOpen(true)}
+            sx={{ color: '#795B4A' }}
+          >
+            Forgot password?
+          </Link>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Don't have an account?{' '}
+            <Link
+              component="button"
+              variant="body2"
+              onClick={() => setIsLoginPage(false)}
+              sx={{ color: '#795B4A' }}
+            >
+              Sign up
+            </Link>
+          </Typography>
+        </Box>
+      </Box>
+
+      <ForgotPasswordDialog 
+        open={isForgotPasswordOpen} 
+        onClose={() => setIsForgotPasswordOpen(false)} 
+      />
+    </>
   );
 };
 

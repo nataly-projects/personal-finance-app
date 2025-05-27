@@ -1,12 +1,11 @@
-import React, {useContext} from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { TextField, Button, Box } from "@mui/material";
-import API from "../services/api";
+import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 import { RegisterFormData } from "../utils/types";
+import { useAuth } from "../hooks/useAuth";
 
 const schema = yup.object().shape({
   fullName: yup
@@ -16,22 +15,17 @@ const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup.string().min(3, "Password must be at least 3 characters").required("Password is required"),
   confirmPassword: yup
-  .string()
-  .oneOf([yup.ref("password"), undefined], "Passwords must match")
-  .required("Confirm Password is required"),
+    .string()
+    .oneOf([yup.ref("password"), undefined], "Passwords must match")
+    .required("Confirm Password is required"),
 });
 
-const RegisterPage: React.FC = () => {
-  const auth = useContext(AuthContext); 
-
-  if (!auth) {
-    throw new Error("AuthContext is not provided. Please wrap the app with AuthProvider.");
-  }
-  const { login } = auth;
+const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = ({ setIsLoginPage }) => {
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const {
-    register,
+    register: formRegister,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
@@ -40,34 +34,53 @@ const RegisterPage: React.FC = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-        const response = await API.post("/users/register", data);
-        console.log('response', response);
-        login(response.data.user); 
-        localStorage.setItem("token", response.data.token);
-        // Redirect the user to the home page
+      const result = await register(data.email, data.password, data.fullName);
+      if (result.success) {
         navigate("/");
         alert("Registration successful!");
+      } else {
+        alert(result.error || "Registration failed.");
+      }
     } catch (error) {
-        console.error(error);
-        alert("Registration failed.");
+      console.error(error);
+      alert("Registration failed.");
     }
   };
 
   return (
     <Box
-    component="form"
-    onSubmit={handleSubmit(onSubmit)}
-    sx={{
-      maxWidth: 400,
-      mx: "auto",
-      mt: 5,
-      display: "flex",
-      flexDirection: "column",
-      gap: 2, // Add spacing between form fields
-    }} > 
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{
+        maxWidth: 400,
+        mx: "auto",
+        mt: 5,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        border: '1px solid #795B4A',
+        borderRadius: '10px',
+        padding: '20px',
+      }}
+    >
+      <Typography 
+        variant="h6" 
+        component="h1" 
+        gutterBottom 
+        sx={{ 
+          color: '#795B4A',
+          textAlign: 'center',
+          fontWeight: 'bold',
+          mb: 3
+        }}
+      >
+        Join our community <br />
+        Start managing your finances today
+      </Typography>
+
       <TextField
         label="Full Name"
-        {...register("fullName")}
+        {...formRegister("fullName")}
         error={!!errors.fullName}
         helperText={errors.fullName?.message}
         fullWidth
@@ -75,7 +88,7 @@ const RegisterPage: React.FC = () => {
       />
       <TextField
         label="Email"
-        {...register("email")}
+        {...formRegister("email")}
         error={!!errors.email}
         helperText={errors.email?.message}
         fullWidth
@@ -84,33 +97,50 @@ const RegisterPage: React.FC = () => {
       <TextField
         label="Password"
         type="password"
-        {...register("password")}
+        {...formRegister("password")}
         error={!!errors.password}
         helperText={errors.password?.message}
         fullWidth
         required
       />
-     <TextField
+      <TextField
         label="Confirm Password"
         type="password"
-        {...register("confirmPassword")}
+        {...formRegister("confirmPassword")}
         error={!!errors.confirmPassword}
         helperText={errors.confirmPassword?.message}
         fullWidth
         required
       />
-
       <Button
         type="submit"
         variant="contained"
         color="primary"
-        fullWidth
-        sx={{ width: "fit-content"}}
+        sx={{ width: "fit-content" }}
       >
-        Register
+        Sign Up
       </Button>
-    </Box>
 
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        gap: 1,
+        mt: 2 
+      }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Already have an account?{' '}
+          <Link
+            component="button"
+            variant="body2"
+            onClick={() => setIsLoginPage(true)}
+            sx={{ color: '#795B4A' }}
+          >
+            Sign in
+          </Link>
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

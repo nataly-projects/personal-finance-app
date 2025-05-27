@@ -1,82 +1,134 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/store';
+import { 
+  setTransactions, 
+  addTransaction, 
+  updateTransaction, 
+  deleteTransaction,
+  setLoading,
+  setError,
+  setOperationLoading
+} from '../store/transactionsSlice';
 import API from '../services/api';
-import { TransactionData } from '../utils/types';
+import { TransactionData, TransactionFormData } from '../utils/types';
+
+const parseTransactionDates = (transaction: any): TransactionData => ({
+  ...transaction,
+  date: new Date(transaction.date),
+  createdAt: new Date(transaction.createdAt),
+  updatedAt: transaction.updatedAt ? new Date(transaction.updatedAt) : null
+});
 
 export const useTransactions = () => {
-  const [transactions, setTransactions] = useState<TransactionData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const { items: transactions, loading, error, operationLoading } = useSelector((state: RootState) => state.transactions);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        setLoading(true);
-        const response = await API.get('/transactions');
-        
-        const transactionsWithDates = response.data.map((transaction: any) => ({
-          ...transaction,
-          date: new Date(transaction.date),
-          createdAt: new Date(transaction.createdAt),
-          updatedAt: transaction.updatedAt ? new Date(transaction.updatedAt) : null
-        }));
-        
-        setTransactions(transactionsWithDates);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching transactions:', err);
-        setError('Failed to load transactions. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, []);
-
-  const addTransaction = async (transaction: Omit<TransactionData, '_id'>) => {
+  const fetchTransactions = useCallback(async () => {
     try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const response = await API.get('/transactions');
+      const transactionsWithDates = response.data.map(parseTransactionDates);
+      dispatch(setTransactions(transactionsWithDates));
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+      dispatch(setError('Failed to load transactions. Please try again later.'));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }, [dispatch]);
+
+  const addTransactionToServer = async (transaction: TransactionFormData) => {
+    let optimisticTransaction: TransactionData | undefined;
+    
+    try {
+      dispatch(setOperationLoading({ operation: 'add', loading: true }));
+      dispatch(setError(null));
+
+      optimisticTransaction = {
+        _id: 'temp-' + Date.now(),
+        ...transaction,
+        date: transaction.date || new Date(),
+        createdAt: new Date(),
+        updatedAt: null
+      } as TransactionData;
+
+      dispatch(addTransaction(optimisticTransaction));
+
       const response = await API.post('/transactions', transaction);
-      const newTransaction = {
-        ...response.data,
-        date: new Date(response.data.date),
-        createdAt: new Date(response.data.createdAt),
-        updatedAt: response.data.updatedAt? new Date(response.data.updatedAt) : null
-      };
-      setTransactions(prev => [...prev, newTransaction]);
+      const newTransaction = parseTransactionDates(response.data);
+
+      dispatch(updateTransaction(newTransaction));
       return newTransaction;
     } catch (err) {
       console.error('Error adding transaction:', err);
-      setError('Failed to add transaction. Please try again.');
+      if (optimisticTransaction) {
+        dispatch(deleteTransaction(optimisticTransaction._id));
+      }
+      dispatch(setError('Failed to add transaction. Please try again.'));
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'add', loading: false }));
     }
   };
 
-  const updateTransaction = async (id: string, transaction: Partial<TransactionData>) => {
+  const updateTransactionInServer = async (id: string, transaction: Partial<TransactionData>) => {
+    let currentTransaction: TransactionData | undefined;
+    
     try {
+      dispatch(setOperationLoading({ operation: 'update', loading: true }));
+      dispatch(setError(null));
+
+      currentTransaction = transactions.find(t => t._id === id);
+      if (currentTransaction) {
+        const updatedTransaction = {
+          ...currentTransaction,
+          ...transaction,
+          updatedAt: new Date()
+        };
+        dispatch(updateTransaction(updatedTransaction));
+      }
+
       const response = await API.put(`/transactions/${id}`, transaction);
-      const updatedTransaction = {
-        ...response.data,
-        date: new Date(response.data.date),
-        createdAt: new Date(response.data.createdAt),
-        updatedAt: response.data.updatedAt ? new Date(response.data.updatedAt) : null
-      };
-      setTransactions(prev => prev.map(t => t._id === id ? updatedTransaction : t));
+      const updatedTransaction = parseTransactionDates(response.data);
+
+      dispatch(updateTransaction(updatedTransaction));
       return updatedTransaction;
     } catch (err) {
       console.error('Error updating transaction:', err);
-      setError('Failed to update transaction. Please try again.');
+      if (currentTransaction) {
+        dispatch(updateTransaction(currentTransaction));
+      }
+      dispatch(setError('Failed to update transaction. Please try again.'));
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'update', loading: false }));
     }
   };
 
-  const deleteTransaction = async (id: string) => {
+  const deleteTransactionFromServer = async (id: string) => {
+    let deletedTransaction: TransactionData | undefined;
+    
     try {
+      dispatch(setOperationLoading({ operation: 'delete', loading: true }));
+      dispatch(setError(null));
+
+      deletedTransaction = transactions.find(t => t._id === id);
+      if (deletedTransaction) {
+        dispatch(deleteTransaction(id));
+      }
+
       await API.delete(`/transactions/${id}`);
-      setTransactions(prev => prev.filter(t => t._id !== id));
     } catch (err) {
       console.error('Error deleting transaction:', err);
-      setError('Failed to delete transaction. Please try again.');
+      if (deletedTransaction) {
+        dispatch(addTransaction(deletedTransaction));
+      }
+      dispatch(setError('Failed to delete transaction. Please try again.'));
       throw err;
+    } finally {
+      dispatch(setOperationLoading({ operation: 'delete', loading: false }));
     }
   };
 
@@ -84,8 +136,10 @@ export const useTransactions = () => {
     transactions,
     loading,
     error,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction
+    operationLoading,
+    addTransaction: addTransactionToServer,
+    updateTransaction: updateTransactionInServer,
+    deleteTransaction: deleteTransactionFromServer,
+    refreshTransactions: fetchTransactions
   };
 };

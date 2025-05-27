@@ -90,7 +90,7 @@ async function deleteTransaction (req, res) {
     
     await Transaction.findByIdAndDelete(req.params.id);
     logger.info(`Transaction deleted successfully for ID: ${req.params.id}`);
-    res.status(200).json({ message: "העסקה נמחקה בהצלחה" });
+    res.status(200).json({ message: "Transaction deleted successfully" });
   } catch (error) {
     console.error(`Error deleting transaction for ID ${req.params.id}:`, error);
     res.status(500).json({ message: "Server error, please try again later" });

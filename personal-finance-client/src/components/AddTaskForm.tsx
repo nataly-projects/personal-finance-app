@@ -29,11 +29,10 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose, onSave, task }) => {
   });
 
     useEffect(() => {
-      console.log("task", task);
       if (task) {
         setValue("title", task.title);
         setValue("description", task.description);
-        setValue("dueDate", task.dueDate ? new Date(task.dueDate) : null);
+        setValue("dueDate", task?.dueDate ? new Date(task.dueDate) : null);
       }
     }, [task, setValue]);
 

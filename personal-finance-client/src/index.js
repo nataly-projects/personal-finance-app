@@ -1,16 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Provider } from 'react-redux';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { StyledEngineProvider } from '@mui/material/styles';
-import { heIL } from '@mui/material/locale';
 import App from "./App";
 import "./index.css";
-import { AuthProvider } from "./context/AuthContext";
+// import { AuthProvider } from "./context/AuthContext";
+import {store} from "./store/store";
 
-// יצירת ערכת נושא מותאמת אישית עם תמיכה בעברית
 const theme = createTheme({
-  direction: 'rtl',
   typography: {
     fontFamily: 'Rubik, Arial, sans-serif',
   },
@@ -22,18 +21,18 @@ const theme = createTheme({
       main: '#dc004e',
     },
   },
-}, heIL);
+});
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
+      <Provider store={store}>
         <BrowserRouter>
-          <AuthProvider>
             <App />
-          </AuthProvider>
         </BrowserRouter>
+        </Provider>
       </ThemeProvider>
     </StyledEngineProvider>
   </React.StrictMode>

@@ -11,7 +11,7 @@ interface TasksTableProps {
   tasks: Task[];
   onToggleComplete: (task: Task) => void;
   onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
+  onDelete: (id: string) => void;
   handleOpenAddDialog?: () => void;
 }
 
@@ -19,57 +19,64 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
     
   const columns: GridColDef[] = [
     {
-        field: 'completed',
-        headerName: 'Completed',
-        flex: 1,
-        headerAlign: 'center',
-        align: 'center', 
-        renderCell: (params) => (
-            <IconButton onClick={() => onToggleComplete(params.row)}>
-            {params.row.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
-            </IconButton>
-        ),
+      field: 'completed',
+      headerName: 'Status',
+      flex: 1,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => (
+        <IconButton onClick={() => onToggleComplete(params.row)}>
+          {params.row.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
+        </IconButton>
+      ),
     },
-    { field: 'title', headerName: 'Title', flex: 1,
-        headerAlign: 'center',
-        align: 'center',  },
-    { field: 'description', headerName: 'Description', flex: 2,
-        headerAlign: 'center',
-        align: 'center',  },
-    {
-        field: 'dueDate',
-        headerName: 'Due Date',
-        flex: 1,
-        headerAlign: 'center',
-        align: 'center', 
-        valueFormatter: (params) => 
-            params ? new Date(params).toLocaleDateString() : 'N/A'
+    { 
+      field: 'title', 
+      headerName: 'Title', 
+      flex: 1,
+      headerAlign: 'center',
+      align: 'center',
     },
-    {
-        field: 'updatedAt',
-        headerName: 'Updated Date',
-        flex: 1,
-        headerAlign: 'center',
-        align: 'center', 
-        valueFormatter: (params) => 
-          params ? new Date(params).toLocaleDateString() : '-'
+    { 
+      field: 'description', 
+      headerName: 'Description', 
+      flex: 2,
+      headerAlign: 'center',
+      align: 'center',
     },
     {
-        field: 'actions',
-        headerName: 'Actions',
-        flex: 1,
-        headerAlign: 'center',
-        align: 'center', 
-        renderCell: (params) => (
-            <Box>
-            <IconButton onClick={() => onEdit(params.row)}>
-                <EditIcon />
-            </IconButton>
-            <IconButton onClick={() => onDelete(params.row._id)}>
-                <DeleteIcon />
-            </IconButton>
-            </Box>
-        ),
+      field: 'dueDate',
+      headerName: 'Due Date',
+      flex: 1,
+      headerAlign: 'center',
+      align: 'center',
+      valueFormatter: (params) => 
+        params ? new Date(params).toLocaleDateString() : 'N/A'
+
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      flex: 1,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => (
+        <Box>
+          <IconButton onClick={() => onEdit(params.row)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => onDelete(params.row._id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ),
     },
   ];
 

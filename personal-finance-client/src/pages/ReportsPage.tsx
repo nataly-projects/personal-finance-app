@@ -1,28 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Typography, Box } from "@mui/material";
-import API from "../services/api";
 import ExpensesByYear from "../components/ExpensesByYear";
 import IncomeVsExpensesByMonth from "../components/IncomeVsExpensesByMonth";
 import ExpensesByMonthInYear from "../components/ExpensesByMonthInYear";
 import ExpensesByCategory from "../components/ExpensesByCategory";
-import { TransactionData } from "../utils/types";
+import { useTransactions } from "../hooks/useTransactions";
 
 const ReportsPage: React.FC = () => {
-  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const { transactions, loading, error } = useTransactions();
   const [year, setYear] = useState(new Date().getFullYear());
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const response = await API.get("/transactions");
-        setTransactions(response.data);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      }
-    };
+  if (loading) {
+    return <Typography>Loading transactions...</Typography>;
+  }
 
-    fetchTransactions();
-  }, []);
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
+
 
   return (
     <Box sx={{ p: 3 }}>

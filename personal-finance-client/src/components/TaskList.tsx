@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import { IconButton, Typography, Box, Dialog, DialogContent } from '@mui/material';
 import { Add as AddIcon, ArrowRight as ArrowRightIcon } from '@mui/icons-material';
@@ -8,16 +8,12 @@ import { List, ListItem, ListItemText } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { useTasks } from '../hooks/useTasks';
+import { useModal } from '../hooks/useModal';
 
 const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
-    const { addTask, updateTask } = useTasks();
+    const { tasks, addTask, updateTask } = useTasks();
     const navigate = useNavigate();
-    const [tasks, setTasks] = useState<Task[]>([]); 
-    const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
-
-    useEffect(() => {
-        setTasks(propTasks);
-    }, [propTasks]);
+    const { isOpen, openModal, closeModal } = useModal();
 
     const handleAddTask = async (newTask: TaskFormData) => {
         const taskToSave: Task = { 
@@ -27,16 +23,15 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
             status: newTask.status || "pending",
             completed: newTask.status === 'completed',
             createdAt: new Date(),
-            updatedAt: null};
+            updatedAt: null
+        };
         try {
-            const savedTask = await addTask(taskToSave); 
-            setTasks((prev) => [...prev, savedTask]); 
-            setIsAddTaskDialogOpen(false);
+            await addTask(taskToSave);
+            closeModal();
         } catch (error) {
             console.error(error);
         }
     };
-
 
     const handleToggleComplete = async (task: Task) => {
         const updatedTask = {
@@ -48,9 +43,6 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
 
         try {
             await updateTask(task._id, updatedTask);
-            setTasks((prev) =>
-                prev.map((t) => (t._id === task._id ? updatedTask : t)) 
-              );
         } catch (error) {
             console.error('Error toggling task completion:', error);
         }
@@ -66,11 +58,10 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                         
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                 <Typography variant="h6">Open Tasks</Typography>
-                <IconButton onClick={() => setIsAddTaskDialogOpen(true)} color="primary">
+                <IconButton onClick={openModal} color="primary">
                     <AddIcon />
                 </IconButton>
             </Box>
-
 
             <List>
                 {tasks.length === 0 ? (
@@ -80,14 +71,14 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                 ) : (
                     tasks.map((task) => (
                         <ListItem key={task._id} divider>
-                              <IconButton
-                              sx={{ marginRight: 2 }}
-                                    edge="end"
-                                    aria-label="toggle complete"
-                                    onClick={() => handleToggleComplete(task)}
-                                >
-                                    {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
-                                </IconButton>
+                            <IconButton
+                                sx={{ marginRight: 2 }}
+                                edge="end"
+                                aria-label="toggle complete"
+                                onClick={() => handleToggleComplete(task)}
+                            >
+                                {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
+                            </IconButton>
                             <ListItemText
                                 primary={task.title}
                                 secondary={
@@ -118,16 +109,17 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                 }} 
                 onClick={navigateToAllTasksPage}
             >
-                <Typography variant="h6" >View all</Typography>
-                <IconButton >
+                <Typography variant="h6">View all</Typography>
+                <IconButton>
                     <ArrowRightIcon />
                 </IconButton>
             </Box>
-            <Dialog open={isAddTaskDialogOpen} onClose={() => setIsAddTaskDialogOpen(false)} maxWidth="sm" fullWidth>
+
+            <Dialog open={isOpen} onClose={closeModal} maxWidth="sm" fullWidth>
                 <DialogContent>
                     <AddTaskForm  
                         onSave={handleAddTask} 
-                        onClose={() => setIsAddTaskDialogOpen(false)} 
+                        onClose={closeModal} 
                     />
                 </DialogContent>
             </Dialog>

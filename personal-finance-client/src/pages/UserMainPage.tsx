@@ -1,7 +1,7 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
 import { Box } from "@mui/material";
-import AppRoutes from "../components/AppRoutes";
+import { Outlet } from "react-router-dom";
 
 const UserMainPage: React.FC = () => {
     return (
@@ -22,11 +22,10 @@ const UserMainPage: React.FC = () => {
               height: '100%',
             }}
           >
-            <AppRoutes /> 
-         
-            </Box>
+            <Outlet />
           </Box>
-      );
+        </Box>
+    );
 };
 
 export default UserMainPage;

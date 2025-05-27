@@ -4,7 +4,7 @@ import { Category } from '../utils/types';
 import { categories as defaultCategories } from '../utils/utils';
 
 export const useCategories = () => {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,8 +13,15 @@ export const useCategories = () => {
       try {
         setLoading(true);
         const response = await API.get<Category[]>('/categories');
-        const apiCategories = response.data.map((category) => category.name);
-        const combinedCategories = Array.from(new Set([...defaultCategories, ...apiCategories]));
+        const defaultCategoryObjects = defaultCategories.map(name => ({
+          _id: name,
+          userId: '', // This will be set by the server
+          name,
+          type: 'expense' as const,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }));
+        const combinedCategories = [...defaultCategoryObjects, ...response.data];
         setCategories(combinedCategories);
         setError(null);
       } catch (err) {
@@ -28,9 +35,48 @@ export const useCategories = () => {
     fetchCategories();
   }, []);
 
-  const addCategory = (newCategory: string) => {
-    if (!categories.includes(newCategory)) {
-      setCategories((prev) => [...prev, newCategory]);
+  const isDuplicateName = (name: string, excludeId?: string): boolean => {
+    return categories.some(cat => 
+      cat.name.toLowerCase() === name.toLowerCase() && 
+      (!excludeId || cat._id !== excludeId)
+    );
+  };
+
+  const addCategory = async (newCategory: Omit<Category, '_id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      if (isDuplicateName(newCategory.name)) {
+        throw new Error('A category with this name already exists');
+      }
+      const response = await API.post<Category>('/categories', newCategory);
+      setCategories(prev => [...prev, response.data]);
+    } catch (err) {
+      console.error('Error adding category:', err);
+      throw err;
+    }
+  };
+
+  const updateCategory = async (categoryId: string, updatedData: Partial<Category>) => {
+    try {
+      if (updatedData.name && isDuplicateName(updatedData.name, categoryId)) {
+        throw new Error('A category with this name already exists');
+      }
+      const response = await API.put<Category>(`/categories/${categoryId}`, updatedData);
+      setCategories(prev => prev.map(cat => 
+        cat._id === categoryId ? response.data : cat
+      ));
+    } catch (err) {
+      console.error('Error updating category:', err);
+      throw err;
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    try {
+      await API.delete(`/categories/${categoryId}`);
+      setCategories(prev => prev.filter(cat => cat._id !== categoryId));
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      throw new Error('Failed to delete category');
     }
   };
 
@@ -39,5 +85,7 @@ export const useCategories = () => {
     loading,
     error,
     addCategory,
+    updateCategory,
+    deleteCategory
   };
 };

@@ -7,11 +7,11 @@ export interface AuthContextType {
 }
 
 export interface User {
-  _id: string;
+  id: string;
   email: string;
   fullName: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | null;
+  updatedAt?: Date | null;
 }
 
 export interface RegisterFormData {
@@ -81,7 +81,7 @@ export interface Category {
   _id: string;
   userId: string;
   name: string;
-  type: 'income' | 'expense';
+  // type: 'income' | 'expense';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -118,7 +118,7 @@ export interface Task {
   title: string;
   description: string;
   dueDate?: Date | null;
-  status: string |'pending' | 'completed';
+  status: 'pending' | 'completed';
   completed: boolean;
   createdAt: Date;
   updatedAt: Date | null;
@@ -148,6 +148,8 @@ export interface TaskFormData {
   description: string;
   dueDate?: Date | null;
   status: 'pending' | 'completed';
+  completed: boolean;
+  userId: string;
 }
 
 export interface AddTaskFormProps {

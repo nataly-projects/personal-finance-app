@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 import React from "react";
 import {
     Drawer,
@@ -9,79 +8,65 @@ import {
     ListItemText,
     Toolbar,
 } from "@mui/material";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import LogoutIcon from "@mui/icons-material/Logout";
+import {
+    Dashboard as DashboardIcon,
+    AccountBalance as AccountBalanceIcon,
+    Receipt as ReceiptIcon,
+    Assessment as AssessmentIcon,
+    Settings as SettingsIcon,
+    Person as PersonIcon,
+    Category as CategoryIcon,
+    Task as TaskIcon,
+    Logout as LogoutIcon
+} from '@mui/icons-material';
 import { Link } from "react-router-dom";
+import { useAuth } from '../hooks/useAuth';
 
 const drawerWidth = 240;
 
+const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Transactions', icon: <AccountBalanceIcon />, path: '/transactions' },
+    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+    { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
+    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
+];
+
 const Sidebar: React.FC = () => {
+    const { logout } = useAuth();
+
     return (
         <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
-        }}
-      >
-        <Toolbar />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/">
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/transactions">
-              <ListItemIcon>
-                <TableChartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Transactions" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/tasks">
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
-              <ListItemText primary="Tasks" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/reports">
-              <ListItemIcon>
-                <BarChartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Reports" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/profile">
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Profile" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/logout">
-              <ListItemIcon>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      );
+            variant="permanent"
+            sx={{
+                width: drawerWidth,
+                flexShrink: 0,
+                [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+            }}
+        >
+            <Toolbar />
+            <List>
+                {menuItems.map((item, index) => (
+                    <ListItem disablePadding key={index}>
+                        <ListItemButton component={Link} to={item.path}>
+                            <ListItemIcon>
+                                {item.icon}
+                            </ListItemIcon>
+                            <ListItemText primary={item.text} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+                <ListItem disablePadding>
+                    <ListItemButton onClick={logout}>
+                        <ListItemIcon>
+                            <LogoutIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Logout" />
+                    </ListItemButton>
+                </ListItem>
+            </List>
+        </Drawer>
+    );
 };
 
 export default Sidebar;

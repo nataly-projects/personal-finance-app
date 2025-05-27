@@ -1,23 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Box, CircularProgress, Alert, Dialog, DialogContent } from "@mui/material";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../store/store";
 import { useTransactions } from '../hooks/useTransactions';
+import { useModal } from '../hooks/useModal';
 import AddTransactionForm from '../components/AddTransactionForm';
 import TransactionsTable from '../components/TransactionsTable';
 import { TransactionData } from '../utils/types';
+import { addTransaction, updateTransaction, deleteTransaction } from "../store/transactionsSlice";
 
 const TransactionsPage: React.FC = () => {
-  const { transactions, loading, error, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
-  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const dispatch = useDispatch();
+  const { 
+    transactions, 
+    loading, 
+    error, 
+    addTransaction, 
+    updateTransaction, 
+    deleteTransaction,
+    refreshTransactions 
+  } = useTransactions();
+  const { isOpen, openModal, closeModal } = useModal();
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionData | null>(null);
 
-  const handleOpenAddDialog = () => {
-    setOpenAddDialog(true);
-  };
-
-  const handleCloseAddDialog = () => {
-    setOpenAddDialog(false);
-    setSelectedTransaction(null);
-  };
+  useEffect(() => {
+    refreshTransactions();
+  }, [refreshTransactions]);
 
   const handleAddTransaction = async (transactionData: any) => {
     try {
@@ -27,7 +35,8 @@ const TransactionsPage: React.FC = () => {
       } else {
         await addTransaction(transactionData);
       }
-      handleCloseAddDialog();
+      closeModal();
+      setSelectedTransaction(null);
     } catch (error) {
       console.error("Error adding transaction:", error);
     }
@@ -35,7 +44,7 @@ const TransactionsPage: React.FC = () => {
 
   const handleEdit = async (transaction: TransactionData) => {
     setSelectedTransaction(transaction);
-    setOpenAddDialog(true);
+    openModal();
   };
 
   const handleDelete = async (id: string) => {
@@ -72,20 +81,20 @@ const TransactionsPage: React.FC = () => {
         </Typography>
       </Box>
       <TransactionsTable 
-      transactions={transactions} 
-      handleOpenAddDialog={handleOpenAddDialog} 
-      handleEdit={handleEdit} 
-      handleDelete={handleDelete} 
+        transactions={transactions} 
+        handleOpenAddDialog={openModal} 
+        handleEdit={handleEdit} 
+        handleDelete={handleDelete} 
       />
 
-      <Dialog open={openAddDialog} onClose={handleCloseAddDialog} maxWidth="sm" fullWidth>
+      <Dialog open={isOpen} onClose={closeModal} maxWidth="sm" fullWidth>
         <DialogContent>
           <AddTransactionForm 
             onSuccess={handleAddTransaction} 
-            handleClose={handleCloseAddDialog}
+            handleClose={closeModal}
             transaction={selectedTransaction}
-            />
-          </DialogContent>
+          />
+        </DialogContent>
       </Dialog>
     </Box>
   );

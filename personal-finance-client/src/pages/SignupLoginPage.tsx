@@ -75,7 +75,7 @@ const SignupLoginPage = () => {
             Sign In
           </Box>
         </Box>
-        {isLoginPage ? <Login /> : <Register />}
+        {isLoginPage ? <Login setIsLoginPage={setIsLoginPage} /> : <Register setIsLoginPage={setIsLoginPage} />}
       </Box>
     </Box>
   );

@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
-import { Box, Typography, Switch, FormControlLabel, TextField, Button, Divider } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/store';
+import { Box, Typography, Switch, FormControlLabel, TextField, Button, Divider, Alert } from '@mui/material';
+import { toggleTheme } from '../store/themeSlice';
+import { useSettings } from '../hooks/useSettings';
 
 const SettingsPage: React.FC = () => {
-  const [notifications, setNotifications] = useState(true);
-  const [outcomeLimit, setOutcomeLimit] = useState<number | ''>(1000); 
-  const [darkMode, setDarkMode] = useState(false); 
+  const dispatch = useDispatch();
+  const { isDarkMode } = useSelector((state: RootState) => state.theme);
+  const { settings, updateNotifications, updateOutcomeLimit } = useSettings();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSave = () => {
-    // Save settings logic here
-    console.log({ notifications, outcomeLimit });
+  const [localNotifications, setLocalNotifications] = useState(settings.notifications);
+  const [localOutcomeLimit, setLocalOutcomeLimit] = useState<number | ''>(settings.outcomeLimit);
+
+  const handleSave = async () => {
+    try {
+      setError(null);
+      setSuccess(null);
+      
+      await updateNotifications(localNotifications);
+      await updateOutcomeLimit(localOutcomeLimit);
+      
+      setSuccess('Settings saved successfully!');
+    } catch (err) {
+      setError('Failed to save settings. Please try again.');
+    }
   };
 
   return (
@@ -17,7 +35,18 @@ const SettingsPage: React.FC = () => {
         Settings
       </Typography>
 
-      {/* Notification Preferences */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {success}
+        </Alert>
+      )}
+
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Notification Preferences
@@ -25,13 +54,13 @@ const SettingsPage: React.FC = () => {
         <FormControlLabel
           control={
             <Switch
-              checked={notifications}
-              onChange={(e) => setNotifications(e.target.checked)}
+              checked={localNotifications}
+              onChange={(e) => setLocalNotifications(e.target.checked)}
             />
           }
           label="Enable Notifications"
         />
-        {notifications && (
+        {localNotifications && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="body1" sx={{ mb: 1 }}>
               Notify me when my monthly outcome exceeds:
@@ -40,9 +69,9 @@ const SettingsPage: React.FC = () => {
               type="number"
               label="Outcome Limit ($)"
               variant="outlined"
-              value={outcomeLimit}
+              value={localOutcomeLimit}
               onChange={(e) =>
-                setOutcomeLimit(e.target.value === '' ? '' : Number(e.target.value))
+                setLocalOutcomeLimit(e.target.value === '' ? '' : Number(e.target.value))
               }
               fullWidth
             />
@@ -52,7 +81,6 @@ const SettingsPage: React.FC = () => {
 
       <Divider sx={{ mb: 4 }} />
 
-  {/* Theme Settings */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Theme Settings
@@ -60,8 +88,8 @@ const SettingsPage: React.FC = () => {
         <FormControlLabel
           control={
             <Switch
-              checked={darkMode}
-              onChange={(e) => setDarkMode(e.target.checked)}
+              checked={isDarkMode}
+              onChange={() => dispatch(toggleTheme())}
             />
           }
           label="Enable Dark Mode"

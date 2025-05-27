@@ -1,18 +1,31 @@
 const mongoose = require("mongoose");
 
+const verificationCodeSchema = new mongoose.Schema({
+  code: {
+    type: String,
+    required: true
+  },
+  expiresAt: {
+    type: Date,
+    required: true
+  }
+});
+
 const userSchema = new mongoose.Schema({
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
   },
-  password: { 
-    type: String, 
-    required: true 
+  password: {
+    type: String,
+    required: true
   },
-  fullName: { 
-    type: String, 
-    required: true 
+  fullName: {
+    type: String,
+    required: true
   },
   categories: [
     {
@@ -20,6 +33,28 @@ const userSchema = new mongoose.Schema({
       ref: "Category", 
     },
   ],
+  passwordUpdate: {
+    type: verificationCodeSchema
+  },
+  passwordReset: {
+    type: verificationCodeSchema
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: null
+  }
 });
 
-module.exports = mongoose.model("User", userSchema);
+// Update the updatedAt field before saving
+userSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

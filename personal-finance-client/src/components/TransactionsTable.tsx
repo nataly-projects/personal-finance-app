@@ -42,7 +42,6 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
             renderCell: (params: GridRenderCellParams) => (
                 <Box>
                     <IconButton 
-                        color="primary" 
                         onClick={() => handleEdit(params.row)}
                     >
                         <EditIcon />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {useAuth} from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Drawer,
@@ -22,8 +22,11 @@ import {
   Assessment as AssessmentIcon,
   Task as TaskIcon,
   Settings as SettingsIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../hooks/useTheme';
 
 const drawerWidth = 240;
 
@@ -32,6 +35,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -75,6 +79,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               Personal Finance Management
             </Typography>
           </Box>
+          <IconButton color="inherit" onClick={toggleTheme} sx={{ mr: 2 }}>
+            {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
           {user?.fullName && (  
             <Typography variant="body1" noWrap>
               {user.fullName}
