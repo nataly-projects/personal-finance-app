@@ -6,7 +6,9 @@ A web application designed to help users manage their personal finances by track
 
 **Transaction Management**: Add, view, and categorize income and expense transactions.
 
-**Budget Notifications**: Get notified when monthly expenses exceed a predefined limit.
+**Task Management**: Create and track tasks with due dates and priorities.
+
+**Category Management**: Organize transactions with custom categories.
 
 **Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
 
@@ -14,24 +16,28 @@ A web application designed to help users manage their personal finances by track
   - **Authentication**: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
   - **Environment Variables**: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
   - **User Registration & Login**: Secure sign-up and sign-in flow with validation and session management.
+  - **Password Management**: Secure password reset and update flows with email verification.
 
 
 ## **Technologies Used**
 
 ### **Frontend**
+- **Language:** TypeScript
 - **Framework:** React
-- **Type Checking:** TypeScript
-- **Styling:** Material UI
+- **State Management:** Redux Toolkit
+- **UI Library:** Material UI
 - **Form Validation:** react-hook-form, yup
-- **HTTP Requests:** Axios
+- **HTTP Client:** Axios
 - **Routing:** react-router-dom
 
 ### **Backend**
+- **Language:** TypeScript
 - **Framework:** Node.js with Express.js
 - **Database:** MongoDB with Mongoose
 - **Authentication:** JSON Web Token (JWT)
 - **Environment Variables:** dotenv
-- **Logging:** Winston – structured logging for tracking server-side activities and errors
+- **Logging:** Winston
+- **Email Service:** Nodemailer
 
 ## Installation
 ### Prerequisites
@@ -49,7 +55,7 @@ A web application designed to help users manage their personal finances by track
   ```
   MONGO_URI=your-mongodb-connection-string
   PORT=5000
-  JWT_SECRET_KEY=your-jwt-secret-key
+  JWT_SECRET=your-secret-key
   ```
 
 3. Install dependencies:
@@ -70,7 +76,8 @@ npm install
 - In one terminal window (Server):
 ```
 cd personal-finance-server
-npm start
+npm run dev
+//npm start
 ```
 - In another terminal window (Client):
 ```
