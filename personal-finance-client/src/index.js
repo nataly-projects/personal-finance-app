@@ -23,13 +23,19 @@ const theme = createTheme({
   },
 });
 
+const router = {
+  future: {
+    v7_startTransition: true
+  }
+};
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
       <Provider store={store}>
-        <BrowserRouter>
+        <BrowserRouter future={router.future}>
             <App />
         </BrowserRouter>
         </Provider>

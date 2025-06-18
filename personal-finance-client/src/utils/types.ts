@@ -81,7 +81,6 @@ export interface Category {
   _id: string;
   userId: string;
   name: string;
-  // type: 'income' | 'expense';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -111,6 +110,7 @@ export interface FilterSectionProps {
 // }
 
 
+export type TaskStatus = 'pending' | 'completed';
 
 export interface Task {
   _id: string;
@@ -123,6 +123,8 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date | null;
 }
+
+
 
 export interface TaskItemProps {
   task: Task;

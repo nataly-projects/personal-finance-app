@@ -6,6 +6,7 @@ import { TextField, MenuItem, Box, Alert, Button, IconButton, Typography } from 
 import CloseIcon from "@mui/icons-material/Close";
 import { AddTransactionFormProps, TransactionFormData } from '../utils/types.js';
 import {useCategories} from "../hooks/useCategories";
+import { Category } from '../utils/types';
 
 const transactionSchema = yup.object().shape({
   amount: yup.number().required("Amount is required").positive("Amount must be positive"),
@@ -56,13 +57,13 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
   const onSubmit: SubmitHandler<TransactionFormData> = async (data) => {
     try {
       setIsSubmitting(true);
-      if (categories.includes(data.category) && isCustomCategory) {
+      if (categories.some(cat => cat.name === data.category) && isCustomCategory) {
         setError("Invalid new category. Please enter another category.");
         return;
       }
   
       if (isCustomCategory && data.category) {
-        addCategory(data.category); 
+        addCategory({ name: data.category }); 
       }
 
       if (onSuccess) {
@@ -134,8 +135,8 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
         }}
       >
         {categories.map((category) => (
-          <MenuItem key={category} value={category}>
-            {category}
+          <MenuItem key={category._id} value={category.name}>
+            {category.name}
           </MenuItem>
         ))}
         <MenuItem value="add-custom-category">Add New Category</MenuItem>

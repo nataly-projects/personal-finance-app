@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import { IconButton, Typography, Box, Dialog, DialogContent } from '@mui/material';
 import { Add as AddIcon, ArrowRight as ArrowRightIcon } from '@mui/icons-material';
-import { TaskListProps, Task, TaskFormData } from '../utils/types';
+import { TaskListProps, Task, TaskFormData, TaskStatus } from '../utils/types';
 import AddTaskForm from './AddTaskForm';
 import { List, ListItem, ListItemText } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -33,15 +33,12 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
         }
     };
 
-    const handleToggleComplete = async (task: Task) => {
-        const updatedTask = {
-            ...task,
-            completed: !task.completed,
-            status: task.completed ? 'pending' : 'completed',
-            updatedAt: new Date()
-        };
-
+    const handleToggleCompletion = async (task: Task) => {
         try {
+            const updatedTask: Partial<Task> = {
+                completed: !task.completed,
+                status: !task.completed ? 'completed' : 'pending' as TaskStatus
+            };
             await updateTask(task._id, updatedTask);
         } catch (error) {
             console.error('Error toggling task completion:', error);
@@ -75,7 +72,7 @@ const TaskList: React.FC<TaskListProps> = ({ propTasks }) => {
                                 sx={{ marginRight: 2 }}
                                 edge="end"
                                 aria-label="toggle complete"
-                                onClick={() => handleToggleComplete(task)}
+                                onClick={() => handleToggleCompletion(task)}
                             >
                                 {task.completed ? <CheckCircleIcon color="success" /> : <RadioButtonUncheckedIcon />}
                             </IconButton>

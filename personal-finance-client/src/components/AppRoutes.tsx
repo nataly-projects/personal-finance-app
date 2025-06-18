@@ -1,6 +1,7 @@
 import React from 'react';
+import { useSelector } from "react-redux";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useAuth } from '../hooks/useAuth';
+import { RootState } from "../store/store";
 import SignupLoginPage from '../pages/SignupLoginPage';
 import HomePage from "../pages/HomePage";
 import ReportsPage from "../pages/ReportsPage";
@@ -11,10 +12,10 @@ import UserMainPage from "../pages/UserMainPage";
 import ProfilePage from "../pages/ProfilePage";
 
 const AppRoutes: React.FC = () => {
-    const { user, token } = useAuth();
+    const user = useSelector((state: RootState) => state.auth.user);
+    const token = useSelector((state: RootState) => state.auth.token);
     const location = useLocation();
 
-    // Check both user and token to ensure proper authentication state
     if ((!user || !token) && location.pathname !== '/login') {
         return <Navigate to="/login" replace />;
     }

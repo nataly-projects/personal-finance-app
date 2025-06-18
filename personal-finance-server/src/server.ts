@@ -15,12 +15,10 @@ app.use(express.json());
 
 app.use('/api', appRoutes);
 
-// Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Connect to MongoDB
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined in environment variables');
 }

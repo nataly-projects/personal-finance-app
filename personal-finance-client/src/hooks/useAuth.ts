@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login as setUser } from '../store/authSlice';
+import { login as setUser, logout as clearUser } from '../store/authSlice';
 import { User } from '../utils/types';
+import { safeJSONParse } from '../utils/utils';
 import API from '../services/api';
 
 
@@ -16,10 +17,11 @@ interface AuthState {
 export const useAuth = () => {
   const [auth, setAuth] = useState<AuthState>(() => {
     const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    const user = safeJSONParse<User>(localStorage.getItem('user'));
+
     return {
       token: token || null,
-      user: user ? JSON.parse(user) : null,
+      user: user,
       loading: false,
       error: null
     };
@@ -40,30 +42,47 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (auth.user) {
-      localStorage.setItem('user', JSON.stringify(auth.user));
-      dispatch(setUser(auth.user));
+      const userForStorage = {
+        ...auth.user,
+        createdAt: auth.user.createdAt?.toISOString() || null,
+        updatedAt: auth.user.updatedAt?.toISOString() || null
+      };
+      localStorage.setItem('user', JSON.stringify(userForStorage));
+      dispatch(setUser({user: auth.user, token: auth?.token || ''}));
     } else {
       localStorage.removeItem('user');
-      dispatch(setUser({
+      dispatch(setUser({ user: {
         id: '',
         email: '',
         fullName: '',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }));
+        createdAt: null,
+        updatedAt: null
+      }, token: '' }));
     }
-  }, [auth.user, dispatch]);
+  }, [auth.user, auth.token, dispatch]);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await API.post('/users/login', { email, password });
       const { token, user } = response.data;
+      
+      const userWithDates = {
+        ...user,
+        createdAt: user.createdAt ? new Date(user.createdAt) : null,
+        updatedAt: user.updatedAt ? new Date(user.updatedAt) : null
+      };
+
+      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
       setAuth({ 
         token, 
-        user,
+        user: userWithDates,
         loading: false,
         error: null
       });
+
+      dispatch(setUser({ user: userWithDates, token }));
+
       return { success: true };
     } catch (error: any) {
       return { 
@@ -77,12 +96,25 @@ export const useAuth = () => {
     try {
       const response = await API.post('/users/register', { email, password, fullName });
       const { token, user } = response.data;
+      
+      const userWithDates = {
+        ...user,
+        createdAt: user.createdAt ? new Date(user.createdAt) : null,
+        updatedAt: user.updatedAt ? new Date(user.updatedAt) : null
+      };
+
+      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
       setAuth({ 
         token, 
-        user,
+        user: userWithDates,
         loading: false,
         error: null
       });
+
+      dispatch(setUser({ user: userWithDates, token }));
+
+
       return { success: true };
     } catch (error: any) {
       return { 
@@ -93,26 +125,16 @@ export const useAuth = () => {
   };
 
   const logout = () => {
+    delete API.defaults.headers.common['Authorization'];
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
     setAuth({ 
       token: null, 
       user: null,
       loading: false,
       error: null
     });
-    dispatch(setUser({
-      id: '',
-      email: '',
-      fullName: '',
-      createdAt: null,
-      updatedAt: null
-    }));
-
-    // Clear API headers
-    delete API.defaults.headers.common['Authorization'];
-    
+    dispatch(clearUser());
     navigate('/login', { replace: true });
   };
 

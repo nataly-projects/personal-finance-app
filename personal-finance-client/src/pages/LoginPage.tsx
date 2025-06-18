@@ -30,8 +30,7 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
     try {
       const result = await login(data.email, data.password);
       if (result.success) {
-        navigate("/");
-        alert("Login successful!");
+        navigate('/', { replace: true });
       } else {
         alert(result.error || "Login failed.");
       }

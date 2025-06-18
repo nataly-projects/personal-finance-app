@@ -36,8 +36,7 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
     try {
       const result = await register(data.email, data.password, data.fullName);
       if (result.success) {
-        navigate("/");
-        alert("Registration successful!");
+        navigate('/', { replace: true });
       } else {
         alert(result.error || "Registration failed.");
       }

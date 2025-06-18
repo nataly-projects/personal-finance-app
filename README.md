@@ -76,8 +76,8 @@ npm install
 - In one terminal window (Server):
 ```
 cd personal-finance-server
-npm run dev
-//npm start
+npm start  
+
 ```
 - In another terminal window (Client):
 ```
