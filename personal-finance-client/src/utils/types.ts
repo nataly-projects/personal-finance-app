@@ -46,9 +46,7 @@ export interface TransactionData {
 
 export interface TransactionsTableProps {
   transactions: TransactionData[];
-  handleOpenAddDialog?: () => void;
-  handleEdit?: (transaction: TransactionData) => void; 
-  handleDelete?: (id: string) => void;
+    handleDelete?: (id: string) => void;
 }
 
 // interface Transaction {

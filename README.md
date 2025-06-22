@@ -1,22 +1,36 @@
 # Personal Finance App
-A web application designed to help users manage their personal finances by tracking transactions, setting budgets, and monitoring expenses.
-
+A comprehensive web application designed to help users manage their personal finances by tracking transactions, setting budgets, monitoring expenses, and achieving financial goals.
 
 ## **Features**
 
-**Transaction Management**: Add, view, and categorize income and expense transactions.
+### **💰 Transaction Management**
+Easily add income and expense transactions with detailed categorization. 
+Automatic categorization with custom category support
 
-**Task Management**: Create and track tasks with due dates and priorities.
+### **📋 Task Management**
+Create tasks with due dates and descriptions.
+Monitor task completion status and progress.
+Never miss important financial tasks
 
-**Category Management**: Organize transactions with custom categories.
 
-**Data Visualization**: View spending patterns through charts and graphs to better understand financial habits.
+### **📊 Data Visualization & Analytics**
+View spending patterns through charts and graphs to better understand financial habits.
 
-**Security**: 
-  - **Authentication**: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
-  - **Environment Variables**: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
-  - **User Registration & Login**: Secure sign-up and sign-in flow with validation and session management.
-  - **Password Management**: Secure password reset and update flows with email verification.
+### **🎯 Budget Management**
+Set and track monthly spending limits
+Get notified when approaching budget limits
+
+### **📧 Email Services**
+Secure password reset via email
+Email alerts for important financial events
+Automated monthly financial summary emails
+
+### **🔐 Security & Authentication**
+
+Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
+Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
+User Registration & Login: Secure sign-up and sign-in flow with validation and session management.
+Password Management: Secure password reset and update flows with email verification.
 
 
 ## **Technologies Used**
@@ -29,6 +43,7 @@ A web application designed to help users manage their personal finances by track
 - **Form Validation:** react-hook-form, yup
 - **HTTP Client:** Axios
 - **Routing:** react-router-dom
+- **Charts:** Recharts for data visualization
 
 ### **Backend**
 - **Language:** TypeScript
@@ -41,8 +56,9 @@ A web application designed to help users manage their personal finances by track
 
 ## Installation
 ### Prerequisites
- - Ensure you have Node.js and npm installed on your machine.
- - MongoDB installed locally or set up with a remote MongoDB URI.
+ - Ensure you have Node.js and npm installed on your machine
+ - MongoDB installed locally or set up with a remote MongoDB URI
+  - SMTP email service (Gmail, SendGrid, etc.) for email functionality
 
 ### Steps
 1. Clone the repository:
@@ -51,11 +67,13 @@ A web application designed to help users manage their personal finances by track
   cd personal-finance
   ```
 
-2. Create a .env file in the personal-finance-server directory and add the following:
+2. Create a `.env` file in the `personal-finance-server` directory and add the following:
   ```
   MONGO_URI=your-mongodb-connection-string
   PORT=5000
   JWT_SECRET=your-secret-key
+  EMAIL=your-email@gmail.com
+  EMAIL_KEY=your-email-app-key
   ```
 
 3. Install dependencies:
