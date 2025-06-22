@@ -4,33 +4,32 @@ A comprehensive web application designed to help users manage their personal fin
 ## **Features**
 
 ### **💰 Transaction Management**
-Easily add income and expense transactions with detailed categorization. 
-Automatic categorization with custom category support
+- Easily add income and expense transactions with detailed categorization. 
+- Automatic categorization with custom category support
 
 ### **📋 Task Management**
-Create tasks with due dates and descriptions.
-Monitor task completion status and progress.
-Never miss important financial tasks
+- Create tasks with due dates and descriptions.
+- Monitor task completion status and progress.
+- Never miss important financial tasks
 
 
 ### **📊 Data Visualization & Analytics**
-View spending patterns through charts and graphs to better understand financial habits.
+- View spending patterns through charts and graphs to better understand financial habits.
 
 ### **🎯 Budget Management**
-Set and track monthly spending limits
-Get notified when approaching budget limits
+- Set and track monthly spending limits
+- Get notified when approaching budget limits
 
 ### **📧 Email Services**
-Secure password reset via email
-Email alerts for important financial events
-Automated monthly financial summary emails
+- Secure password reset via email
+- Email alerts for important financial events
+- Automated monthly financial summary emails
 
 ### **🔐 Security & Authentication**
-
-Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
-Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
-User Registration & Login: Secure sign-up and sign-in flow with validation and session management.
-Password Management: Secure password reset and update flows with email verification.
+- Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
+- Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
+- User Registration & Login: Secure sign-up and sign-in flow with validation and session management.
+- Password Management: Secure password reset and update flows with email verification.
 
 
 ## **Technologies Used**
@@ -58,7 +57,7 @@ Password Management: Secure password reset and update flows with email verificat
 ### Prerequisites
  - Ensure you have Node.js and npm installed on your machine
  - MongoDB installed locally or set up with a remote MongoDB URI
-  - SMTP email service (Gmail, SendGrid, etc.) for email functionality
+  - SMTP email service for email functionality
 
 ### Steps
 1. Clone the repository:
@@ -95,7 +94,6 @@ npm install
 ```
 cd personal-finance-server
 npm start  
-
 ```
 - In another terminal window (Client):
 ```
