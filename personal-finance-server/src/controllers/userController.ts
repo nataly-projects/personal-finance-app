@@ -28,7 +28,6 @@ import { generateVerificationCode } from '../utils/utils';
 import { sendResetCodeEmail, sendPasswordUpdateEmail } from '../services/mailService';
 import { logger } from '../utils/logger';
 
-// Extend Express Request type to include user
 interface AuthenticatedRequest extends Request {
   user: {
     id: string;
@@ -64,15 +63,15 @@ export const register = async (req: Request<{}, {}, RegisterRequest>, res: Respo
     logger.info(`New user registered: ${email} ${fullName}`);
     
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET_KEY || 'your-secret-key',
       { expiresIn: '100y' }
     );
 
     res.status(201).json({
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         fullName: user.fullName,
         createdAt: user.createdAt,
@@ -109,15 +108,15 @@ export const login = async (req: Request<{}, {}, LoginRequest>, res: Response<Lo
     }
 
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
+      { id: user.id.toString(), email: user.email },
+      process.env.JWT_SECRET_KEY || 'your-secret-key',
       { expiresIn: '1d' }
     );
 
     res.json({
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         fullName: user.fullName,
         createdAt: user.createdAt,
@@ -233,7 +232,7 @@ export const getUserProfile = async (req: AuthenticatedRequest, res: Response) =
     res.status(200).json({ 
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         fullName: user.fullName,
         createdAt: user.createdAt,
@@ -262,14 +261,19 @@ export const getUserDashboard = async (req: AuthenticatedRequest, res: Response)
     const totalExpenses = transactions
       .filter(t => t.type === "expense")
       .reduce((sum, t) => sum + t.amount, 0);
-    
+  console.log('transactions: ', transactions);  
     const expensesByCategory = transactions
       .filter(t => t.type === "expense")
       .reduce((acc, t) => {
-        if (!acc[t.categoryId]) {
-          acc[t.categoryId] = 0;
+        const category = t.category;
+        if (!acc[category]) {
+          acc[category] = 0;
         }
-        acc[t.categoryId] += t.amount;
+        
+        // if (!acc[t.categoryId]) {
+        //   acc[t.categoryId] = 0;
+        // }
+        acc[category] += t.amount;
         return acc;
       }, {} as Record<string, number>);
     
@@ -307,7 +311,10 @@ export const requestPasswordUpdate = async (req: AuthenticatedRequest, res: Resp
     };
     await user.save();
 
-    await sendResetCodeEmail(user.email, verificationCode, user.fullName);
+    await sendResetCodeEmail({
+      email: user.email, 
+      verificationCode: verificationCode, 
+      userName: user.fullName});
 
     logger.info(`Password verification code sent to user ID: ${req.user.id}`);
     res.json({ success: true });
@@ -411,7 +418,7 @@ export const updateUserProfile = async (req: AuthenticatedRequest, res: Response
     res.json({ 
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         fullName: user.fullName,
         createdAt: user.createdAt,

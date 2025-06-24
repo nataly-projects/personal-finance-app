@@ -4,17 +4,17 @@ A comprehensive web application designed to help users manage their personal fin
 ## **Features**
 
 ### **💰 Transaction Management**
-- Easily add income and expense transactions with detailed categorization. 
+- Easily add income and expense transactions with detailed categorization
 - Automatic categorization with custom category support
 
 ### **📋 Task Management**
-- Create tasks with due dates and descriptions.
-- Monitor task completion status and progress.
+- Create tasks with due dates and descriptions
+- Monitor task completion status and progress
 - Never miss important financial tasks
 
 
 ### **📊 Data Visualization & Analytics**
-- View spending patterns through charts and graphs to better understand financial habits.
+- View spending patterns through charts and graphs to better understand financial habits
 
 ### **🎯 Budget Management**
 - Set and track monthly spending limits
@@ -26,10 +26,10 @@ A comprehensive web application designed to help users manage their personal fin
 - Automated monthly financial summary emails
 
 ### **🔐 Security & Authentication**
-- Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application.
-- Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure.
-- User Registration & Login: Secure sign-up and sign-in flow with validation and session management.
-- Password Management: Secure password reset and update flows with email verification.
+- Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application
+- Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure
+- User Registration & Login: Secure sign-up and sign-in flow with validation and session management
+- Password Management: Secure password reset and update flows with email verification
 
 
 ## **Technologies Used**
@@ -70,7 +70,7 @@ A comprehensive web application designed to help users manage their personal fin
   ```
   MONGO_URI=your-mongodb-connection-string
   PORT=5000
-  JWT_SECRET=your-secret-key
+  JWT_SECRET_KEY=your-secret-key
   EMAIL=your-email@gmail.com
   EMAIL_KEY=your-email-app-key
   ```

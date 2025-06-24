@@ -28,7 +28,7 @@ export const useTasks = () => {
       dispatch(setLoading(true));
       dispatch(setError(null));
       const response = await API.get('/tasks');
-      dispatch(setTasks(response.data));
+      dispatch(setTasks(response.data.tasks));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading tasks';
       dispatch(setError(errorMessage));

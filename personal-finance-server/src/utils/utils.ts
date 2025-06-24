@@ -6,4 +6,6 @@ export const EMAIL_SUBJECTS = {
   CONTACT_US: 'New Contact Us Message From Personal Finance App',
   PASSWORD_RESET: 'Password Reset Verification Code From Personal Finance App',
   PASSWORD_UPDATE: 'Password Update Verification Code From Personal Finance App',
+  MONTHLYֹֹ_EXCEED: 'Monthly Outcome Limit Exceeded From Personal Finance App',
+  MONTHLY_SUMMARY: 'Your Monthly Finance Summary From Personal Finance App'
 } as const; 

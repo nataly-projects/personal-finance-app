@@ -106,7 +106,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
                 <DataGrid
                   rows={transactions}
                   columns={columns}
-                  getRowId={(row) => row._id}
+                  getRowId={(row) => row._id || row.id}
                   initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
                   pageSizeOptions={[5, 10, 20, 50]}
                   disableRowSelectionOnClick

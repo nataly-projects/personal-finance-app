@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import * as transactionController from '../controllers/transactionController';
 import { authenticate } from '../middleware/authMiddleware';
-import { AuthenticatedRequest } from '@shared/types/auth';
 
 const router = Router();
 

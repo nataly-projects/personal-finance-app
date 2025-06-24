@@ -9,7 +9,7 @@ import {
   UpdateCategoryResponse,
   DeleteCategoryResponse
 } from '@shared/types/category';
-import { AuthenticatedRequest } from '@shared/types/auth';
+import { AuthenticatedRequest } from '../utils/types';
 
 export const addCategory = async (req: AuthenticatedRequest, res: Response<AddCategoryResponse>) => {
   const userId = req.user.id;
@@ -34,9 +34,9 @@ export const addCategory = async (req: AuthenticatedRequest, res: Response<AddCa
     res.status(201).json({
       success: true,
       category: {
-        id: category._id.toString(),
+        id: category.id.toString(),
         name: category.name,
-        userId: category.userId,
+        userId: category.userId.toString(),
         createdAt: category.createdAt,
         updatedAt: category.updatedAt
       }
@@ -61,9 +61,9 @@ export const getCategories = async (req: AuthenticatedRequest, res: Response<Get
     res.status(200).json({
       success: true,
       categories: categories.map(c => ({
-        id: c._id.toString(),
+        id: c.id.toString(),
         name: c.name,
-        userId: c.userId,
+        userId: c.userId.toString(),
         createdAt: c.createdAt,
         updatedAt: c.updatedAt
       }))
@@ -106,9 +106,9 @@ export const updateCategory = async (req: AuthenticatedRequest, res: Response<Up
     res.status(200).json({
       success: true,
       category: {
-        id: category._id.toString(),
+        id: category.id.toString(),
         name: category.name,
-        userId: category.userId,
+        userId: category.userId.toString(),
         createdAt: category.createdAt,
         updatedAt: category.updatedAt
       }

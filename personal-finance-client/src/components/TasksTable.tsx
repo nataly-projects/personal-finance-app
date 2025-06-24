@@ -85,7 +85,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
       <DataGrid
         rows={tasks}
         columns={columns}
-        getRowId={(row) => row._id}
+        getRowId={(row) => row._id || row.id}
         initialState={{
             pagination: {
               paginationModel: { pageSize: 10, page: 0 },

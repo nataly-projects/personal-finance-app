@@ -9,13 +9,8 @@ import {
   UpdateTaskResponse,
   DeleteTaskResponse
 } from '@shared/types/task';
+import { AuthenticatedRequest } from '../utils/types';
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-  };
-}
 
 export const addTask = async (req: AuthenticatedRequest, res: Response<AddTaskResponse>) => {
   const userId = req.user.id;
@@ -40,12 +35,12 @@ export const addTask = async (req: AuthenticatedRequest, res: Response<AddTaskRe
     res.status(201).json({
       success: true,
       task: {
-        id: task._id.toString(),
+        id: task.id.toString(),
         title: task.title,
         description: task.description,
         dueDate: task.dueDate,
         completed: task.completed,
-        userId: task.userId,
+        userId: task.userId.toString(),
         createdAt: task.createdAt,
         updatedAt: task.updatedAt
       }
@@ -71,12 +66,12 @@ export const getTasks = async (req: AuthenticatedRequest, res: Response<GetTasks
     res.status(200).json({
       success: true,
       tasks: tasks.map(t => ({
-        id: t._id.toString(),
+        id: t.id.toString(),
         title: t.title,
         description: t.description,
         dueDate: t.dueDate,
         completed: t.completed,
-        userId: t.userId,
+        userId: t.userId.toString(),
         createdAt: t.createdAt,
         updatedAt: t.updatedAt
       }))
@@ -113,12 +108,12 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response<Update
     res.status(200).json({
       success: true,
       task: {
-        id: task._id.toString(),
+        id: task.id.toString(),
         title: task.title,
         description: task.description,
         dueDate: task.dueDate,
         completed: task.completed,
-        userId: task.userId,
+        userId: task.userId.toString(),
         createdAt: task.createdAt,
         updatedAt: task.updatedAt
       }

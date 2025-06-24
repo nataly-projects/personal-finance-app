@@ -9,6 +9,11 @@ export interface User {
   passwordResetCode?: Date;
   createdAt: Date;
   updatedAt: Date | null;
+  settings?: {
+    monthlyOutcomeLimit: number | null;
+    enableOutcomeAlert: boolean;
+    theme: 'light' | 'dark';
+  };
 }
 
 declare global {
@@ -22,8 +27,13 @@ declare global {
   }
 }
 
-export type AuthenticatedRequest = Request;
-
+// export type AuthenticatedRequest = Request;
+export interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+  };
+}
 export interface LoginRequest {
   email: string;
   password: string;

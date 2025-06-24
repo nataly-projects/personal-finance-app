@@ -19,8 +19,8 @@ const Dashboard: React.FC = () => {
       try {
         const response = await API.get('/users/dashboard');
         if (!response.data) throw new Error('No data received');
-        setDashboardData(response.data);
-        processData(response.data);
+        setDashboardData(response.data.data);
+        processData(response.data.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
@@ -29,14 +29,14 @@ const Dashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  const processData = (data: DashboardData) => {
-    const categoryDataArray = Object.entries(data.expensesByCategory).map(([name, value]) => ({
+  const processData = (dashboardData: DashboardData) => {
+    const categoryDataArray = Object.entries(dashboardData.expensesByCategory).map(([name, value]) => ({
       name,
       value,
     }));
     setCategoryData(categoryDataArray);
 
-    const monthlyStats = data.recentTransactions.reduce((acc: any, curr) => {
+    const monthlyStats = dashboardData.recentTransactions.reduce((acc: any, curr) => {
       const month = new Date(curr.date).toLocaleString('en-US', { month: 'long' });
       if (!acc[month]) acc[month] = { Expenses: 0, Income: 0 };
       curr.type === 'expense' ? acc[month].Expenses += curr.amount : acc[month].Income += curr.amount;

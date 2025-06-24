@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Transaction } from '../models/Transaction';
+import { User, UserDocument } from '../models/User';
 import { logger } from '../utils/logger';
 import {
   AddTransactionRequest,
@@ -9,6 +10,7 @@ import {
   UpdateTransactionResponse,
   DeleteTransactionResponse
 } from '@shared/types/transaction';
+import {sendOutcomeLimitExceededEmail} from '../services/mailService';
 
 
 interface AuthenticatedRequest extends Request {
@@ -17,6 +19,49 @@ interface AuthenticatedRequest extends Request {
     email: string;
   };
 }
+
+const checkAndNotifyBudgetLimit = async ({
+  user,
+  date,
+}: {
+  user: UserDocument;
+  date: Date;
+}) => {
+  if (!user?.settings || !user.settings.enableOutcomeAlert || user.settings.monthlyOutcomeLimit == null) return;
+
+  const monthStart = new Date(date);
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const monthEnd = new Date(monthStart);
+  monthEnd.setMonth(monthStart.getMonth() + 1);
+
+  const expensesThisMonth = await Transaction.aggregate([
+    {
+      $match: {
+        userId: user._id,
+        type: 'expense',
+        date: { $gte: monthStart, $lt: monthEnd },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$amount' },
+      },
+    },
+  ]);
+
+  const total = expensesThisMonth[0]?.total || 0;
+
+  if (total > user.settings.monthlyOutcomeLimit) {
+    await sendOutcomeLimitExceededEmail({
+      email: user.email,
+      userName: user.fullName,
+      limit: user.settings.monthlyOutcomeLimit,
+      currentTotal: total,
+    });
+  }
+};
 
 export const addTransaction = async (req: AuthenticatedRequest, res: Response<AddTransactionResponse>) => {
     const userId = req.user.id;
@@ -48,16 +93,22 @@ export const addTransaction = async (req: AuthenticatedRequest, res: Response<Ad
     });
     
     await transaction.save();
+
+    const user = await User.findById(userId);
+    if (user) {
+      await checkAndNotifyBudgetLimit({ user, date });
+    }
+
     logger.info(`Transaction added successfully for user ID: ${userId}`);
     res.status(201).json({
       success: true,
       transaction: {
-        id: transaction._id.toString(),
+        id: transaction.id.toString(),
         amount: transaction.amount,
         description: transaction.description,
         date: transaction.date,
-        categoryId: transaction.categoryId,
-        userId: transaction.userId,
+        category: transaction.category,
+        userId: transaction.userId.toString(),
         type: transaction.type,
         createdAt: transaction.createdAt,
         updatedAt: transaction.updatedAt
@@ -84,12 +135,12 @@ export const getTransactions = async (req: AuthenticatedRequest, res: Response<G
     res.status(200).json({
       success: true,
       transactions: transactions.map(t => ({
-        id: t._id.toString(),
+        id: t.id,
         amount: t.amount,
         description: t.description,
         date: t.date,
-        categoryId: t.categoryId,
-        userId: t.userId,
+        category: t.category,
+        userId: t.userId.toString(),
         type: t.type,
         createdAt: t.createdAt,
         updatedAt: t.updatedAt
@@ -143,12 +194,12 @@ export const updateTransaction = async (req: AuthenticatedRequest, res: Response
     res.status(200).json({
       success: true,
       transaction: {
-        id: transaction._id.toString(),
+        id: transaction.id.toString(),
         amount: transaction.amount,
         description: transaction.description,
         date: transaction.date,
-        categoryId: transaction.categoryId,
-        userId: transaction.userId,
+        category: transaction.category,
+        userId: transaction.userId.toString(),
         type: transaction.type,
         createdAt: transaction.createdAt,
         updatedAt: transaction.updatedAt

@@ -1,17 +1,13 @@
 import React, { useEffect } from "react";
-import { Typography, Box, CircularProgress, Alert, Dialog, DialogContent } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { Typography, Box, CircularProgress, Alert } from "@mui/material";
 import { useTransactions } from '../hooks/useTransactions';
 import TransactionsTable from '../components/TransactionsTable';
 
 const TransactionsPage: React.FC = () => {
-  const dispatch = useDispatch();
   const { 
     transactions, 
     loading, 
     error, 
-    addTransaction, 
-    updateTransaction, 
     deleteTransaction,
     refreshTransactions 
   } = useTransactions();

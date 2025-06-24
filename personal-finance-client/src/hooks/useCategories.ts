@@ -3,6 +3,11 @@ import API from '../services/api';
 import { Category } from '../utils/types';
 import { categories as defaultCategories } from '../utils/utils';
 
+interface CategoryResponse {
+  categories: Category[];
+  success: boolean;
+}
+
 export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -12,16 +17,18 @@ export const useCategories = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await API.get<Category[]>('/categories');
+        const response = await API.get<CategoryResponse>('/categories');
         const defaultCategoryObjects = defaultCategories.map(name => ({
           _id: name,
-          userId: '', // This will be set by the server
+          userId: '', 
           name,
           type: 'expense' as const,
           createdAt: new Date(),
           updatedAt: new Date()
         }));
-        const combinedCategories = [...defaultCategoryObjects, ...response.data];
+        
+        const serverCategories = response.data.categories || [];
+        const combinedCategories = [...defaultCategoryObjects, ...serverCategories];
         setCategories(combinedCategories);
         setError(null);
       } catch (err) {

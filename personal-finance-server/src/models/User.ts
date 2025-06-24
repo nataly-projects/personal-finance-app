@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 const verificationCodeSchema = new Schema({
   code: {
@@ -11,7 +11,23 @@ const verificationCodeSchema = new Schema({
   }
 });
 
-interface UserDocument {
+const settingsSchema = new Schema({
+  monthlyOutcomeLimit: {
+    type: Number,
+    default: null
+  },
+  enableOutcomeAlert: {
+    type: Boolean,
+    default: false
+  },
+  theme: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
+  },
+});
+
+export interface UserDocument extends Document {
   email: string;
   password: string;
   fullName: string;
@@ -25,6 +41,11 @@ interface UserDocument {
   };
   createdAt: Date;
   updatedAt: Date | null;
+  settings?: {
+    monthlyOutcomeLimit: number | null;
+    enableOutcomeAlert: boolean;
+    theme: 'light' | 'dark';
+  };
 }
 
 
@@ -59,7 +80,11 @@ const userSchema = new Schema<UserDocument>({
   updatedAt: {
     type: Date,
     default: null
-  }
+  },
+  settings: {
+    type: settingsSchema,
+    default: {}  
+  },
 }, {
   timestamps: false
 });

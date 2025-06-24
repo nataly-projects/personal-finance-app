@@ -1,8 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { Category as CategoryType } from '@shared/types/category';
 
-export interface CategoryDocument extends Document, Omit<CategoryType, 'id'> {
-  userId: Schema.Types.ObjectId;
+export interface CategoryDocument extends Document, 
+  Omit<CategoryType, 'id' | 'userId'> {
+  userId: mongoose.Types.ObjectId;
 }
 
 const categorySchema = new Schema<CategoryDocument>({

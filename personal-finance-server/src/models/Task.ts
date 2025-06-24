@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { Task as TaskType } from '@shared/types/task';
 
-export interface TaskDocument extends Document, Omit<TaskType, 'id'> {
+export interface TaskDocument extends Document, 
+Omit<TaskType, 'id' | 'userId'> {
   userId: Schema.Types.ObjectId;
 }
 

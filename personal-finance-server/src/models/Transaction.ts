@@ -1,10 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { Transaction as TransactionType } from '@shared/types/transaction';
 
-export interface TransactionDocument extends Document, Omit<TransactionType, 'id'> {
-  userId: Schema.Types.ObjectId;
-  categoryId: Schema.Types.ObjectId;
+
+export interface TransactionDocument extends Document, 
+  Omit<TransactionType, 'id' | 'userId'> {
+  userId: mongoose.Types.ObjectId;
 }
+
+
 
 const transactionSchema = new Schema<TransactionDocument>({
   amount: {
@@ -20,9 +23,8 @@ const transactionSchema = new Schema<TransactionDocument>({
     type: Date,
     required: true
   },
-  categoryId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Category',
+  category: {
+    type: String,
     required: true
   },
   userId: {

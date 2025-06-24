@@ -21,7 +21,7 @@ export const useAuth = () => {
 
     return {
       token: token || null,
-      user: user,
+      user: user || null,
       loading: false,
       error: null
     };
@@ -44,8 +44,8 @@ export const useAuth = () => {
     if (auth.user) {
       const userForStorage = {
         ...auth.user,
-        createdAt: auth.user.createdAt?.toISOString() || null,
-        updatedAt: auth.user.updatedAt?.toISOString() || null
+        createdAt: auth.user.createdAt?.toString() || null,
+        updatedAt: auth.user.updatedAt?.toString() || null
       };
       localStorage.setItem('user', JSON.stringify(userForStorage));
       dispatch(setUser({user: auth.user, token: auth?.token || ''}));

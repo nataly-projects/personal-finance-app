@@ -13,6 +13,11 @@ import {
 import API from '../services/api';
 import { TransactionData, TransactionFormData } from '../utils/types';
 
+interface TransactionsResponse {
+  transactions: any[];
+  success: boolean;
+}
+
 const parseTransactionDates = (transaction: any): TransactionData => ({
   ...transaction,
   date: new Date(transaction.date),
@@ -28,8 +33,8 @@ export const useTransactions = () => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
-      const response = await API.get('/transactions');
-      const transactionsWithDates = response.data.map(parseTransactionDates);
+      const response = await API.get<TransactionsResponse>('/transactions');
+      const transactionsWithDates = (response.data.transactions || []).map(parseTransactionDates);
       dispatch(setTransactions(transactionsWithDates));
     } catch (err) {
       console.error('Error fetching transactions:', err);
