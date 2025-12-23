@@ -14,7 +14,8 @@ export interface AddTransactionRequest {
   amount: number;
   description: string;
   date: Date;
-  categoryId: string;
+  category: string;
+  categoryId?: string;
   type: 'income' | 'expense';
 }
 

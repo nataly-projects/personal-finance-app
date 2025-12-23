@@ -66,7 +66,6 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({ transactions, han
                         <EditIcon />
                     </IconButton>
                     <IconButton 
-                        color="secondary" 
                         onClick={() => handleDelete(params.row._id)}
                     >
                         <DeleteIcon />

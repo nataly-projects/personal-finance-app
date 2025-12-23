@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { logger } from './utils/logger';
 import appRoutes from './routes/appRoutes';
+import { errorHandler } from './middleware/errorMiddleware';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', appRoutes);
+app.use(errorHandler);
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });

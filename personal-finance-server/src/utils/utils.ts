@@ -9,3 +9,9 @@ export const EMAIL_SUBJECTS = {
   MONTHLYֹֹ_EXCEED: 'Monthly Outcome Limit Exceeded From Personal Finance App',
   MONTHLY_SUMMARY: 'Your Monthly Finance Summary From Personal Finance App'
 } as const; 
+
+export class ApiError extends Error {
+    constructor(public statusCode: number, message: string) {
+        super(message);
+    }
+}
