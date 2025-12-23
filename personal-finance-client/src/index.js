@@ -8,20 +8,7 @@ import App from "./App";
 import "./index.css";
 // import { AuthProvider } from "./context/AuthContext";
 import {store} from "./store/store";
-
-const theme = createTheme({
-  typography: {
-    fontFamily: 'Rubik, Arial, sans-serif',
-  },
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+import theme from './theme';
 
 const router = {
   future: {

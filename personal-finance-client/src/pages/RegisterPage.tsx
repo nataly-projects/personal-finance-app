@@ -6,12 +6,14 @@ import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { RegisterFormData } from "../utils/types";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "@mui/material/styles";
 
 const schema = yup.object().shape({
-  fullName: yup
-    .string()
-    .matches(/^[a-zA-Z]+ [a-zA-Z]+$/, "Full Name must include first and last name")
-    .required("Full Name is required"),
+  // fullName: yup
+  //   .string()
+  //   .matches(/^[a-zA-Z]+ [a-zA-Z]+$/, "Full Name must include first and last name")
+  //   .required("Full Name is required"),
+  fullName: yup.string().required("Full Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup.string().min(3, "Password must be at least 3 characters").required("Password is required"),
   confirmPassword: yup
@@ -21,8 +23,10 @@ const schema = yup.object().shape({
 });
 
 const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = ({ setIsLoginPage }) => {
-  const { login, register } = useAuth();
+
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const {
     register: formRegister,
@@ -51,18 +55,25 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       sx={{
-        maxWidth: 400,
-        mx: "auto",
-        mt: 5,
         display: "flex",
         flexDirection: "column",
         gap: 2,
-        border: '1px solid #795B4A',
-        borderRadius: '10px',
-        padding: '20px',
+        padding: "24px",
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: "12px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        // maxWidth: 400,
+        // mx: "auto",
+        // mt: 5,
+        // display: "flex",
+        // flexDirection: "column",
+        // gap: 2,
+        // border: '1px solid #795B4A',
+        // borderRadius: '10px',
+        // padding: '20px',
       }}
     >
-      <Typography 
+      {/* <Typography 
         variant="h6" 
         component="h1" 
         gutterBottom 
@@ -75,6 +86,17 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
       >
         Join our community <br />
         Start managing your finances today
+      </Typography> */}
+
+       <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          textAlign: "center",
+          color: theme.customColors.lightBlue,
+        }}
+      >
+        Create Your Account
       </Typography>
 
       <TextField
@@ -83,7 +105,6 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
         error={!!errors.fullName}
         helperText={errors.fullName?.message}
         fullWidth
-        required
       />
       <TextField
         label="Email"
@@ -91,7 +112,6 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
         error={!!errors.email}
         helperText={errors.email?.message}
         fullWidth
-        required
       />
       <TextField
         label="Password"
@@ -100,7 +120,6 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
         error={!!errors.password}
         helperText={errors.password?.message}
         fullWidth
-        required
       />
       <TextField
         label="Confirm Password"
@@ -109,18 +128,42 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
         error={!!errors.confirmPassword}
         helperText={errors.confirmPassword?.message}
         fullWidth
-        required
       />
       <Button
         type="submit"
         variant="contained"
         color="primary"
-        sx={{ width: "fit-content" }}
+        sx={{ 
+          // width: "fit-content",
+           backgroundColor: theme.customColors.lightBlue,
+          "&:hover": { backgroundColor: theme.customColors.hoverBlue }, 
+        }}
       >
         Sign Up
       </Button>
 
-      <Box sx={{ 
+      <Typography
+        variant="body1"
+        sx={{
+          textAlign: "center",
+          color: "text.secondary",
+        }}
+      >
+        Already have an account?{" "}
+        <Link
+          variant="body1"
+          component="button"
+          onClick={() => setIsLoginPage(true)}
+          sx={{ 
+            color: theme.customColors.lightBlue, 
+            textDecoration: "none", 
+          }}
+        >
+          Sign In
+        </Link>
+      </Typography>
+
+      {/* <Box sx={{ 
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center', 
@@ -138,7 +181,7 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
             Sign in
           </Link>
         </Typography>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

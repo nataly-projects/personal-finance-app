@@ -66,6 +66,7 @@ export interface PasswordResetRequest {
 export interface PasswordResetResponse {
   success: boolean;
   error?: string;
+  message?: string;
 }
 
 export interface VerifyResetCodeRequest {
@@ -76,6 +77,7 @@ export interface VerifyResetCodeRequest {
 export interface VerifyResetCodeResponse {
   success: boolean;
   error?: string;
+  message?: string;
 }
 
 export interface ResetPasswordRequest {
@@ -87,6 +89,7 @@ export interface ResetPasswordRequest {
 export interface ResetPasswordResponse {
   success: boolean;
   error?: string;
+  message?: string;
 }
 
 export interface UpdateProfileRequest {

@@ -138,7 +138,7 @@ export const requestPasswordReset = async (req: Request<{}, {}, PasswordResetReq
     const user = await User.findOne({ email });
     if (!user) {
       logger.warn(`Password reset request failed: User with email ${email} not found`);
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     const resetCode = generateVerificationCode();
@@ -162,7 +162,7 @@ export const requestPasswordReset = async (req: Request<{}, {}, PasswordResetReq
     res.json({ success: true });
   } catch (error) {
     logger.error(`Password reset request error for user email: ${email}:`, error);
-    res.status(500).json({ success: false, error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -179,13 +179,13 @@ export const verifyResetCode = async (req: Request<{}, {}, VerifyResetCodeReques
 
     if (!user) {
       logger.warn(`Reset code verification failed: User with email ${email} not found or Invalid code`);
-      return res.status(400).json({ success: false, error: 'Invalid or expired code' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired code' });
     }
 
     res.json({ success: true });
   } catch (error) {
     logger.error(`Reset code verification error for email ${email}:`, error);
-    res.status(500).json({ success: false, error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -200,7 +200,7 @@ export const resetPassword = async (req: Request<{}, {}, ResetPasswordRequest>, 
 
     if (!user) {
       logger.warn(`Password reset failed: User with email ${email} not found or invalid code`);
-      return res.status(400).json({ success: false, error: 'Invalid or expired code' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired code' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -214,7 +214,7 @@ export const resetPassword = async (req: Request<{}, {}, ResetPasswordRequest>, 
     res.json({ success: true });
   } catch (error) {
     logger.error(`Password reset error for email ${email}:`, error);
-    res.status(500).json({ success: false, error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

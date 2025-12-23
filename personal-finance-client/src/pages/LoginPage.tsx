@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from '@mui/material/styles';
 import { LoginFormData } from "../utils/types";
 import { useAuth } from "../hooks/useAuth";
 import ForgotPasswordDialog from "../components/ForgotPasswordDialog";
@@ -14,8 +15,10 @@ const schema = yup.object().shape({
 });
 
 const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => void }) => {
+
   const { login } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = React.useState(false);
 
   const {
@@ -46,28 +49,38 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         sx={{
-          maxWidth: 400,
-          mx: "auto",
-          mt: 5,
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          border: '1px solid #795B4A',
-          borderRadius: '10px',
-          padding: '20px',
+          padding: "24px",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: "12px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          // maxWidth: 400,
+          // mx: "auto",
+          // mt: 5,
+          // display: "flex",
+          // flexDirection: "column",
+          // gap: 2,
+          // border: '1px solid #795B4A',
+          // borderRadius: '10px',
+          // padding: '20px',
         }}
       >
         <Typography 
-          variant="h6" 
-          gutterBottom 
+          variant="h5" 
+          // gutterBottom 
           sx={{ 
-            color: '#795B4A',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            mb: 3
+            fontWeight: "bold",
+            textAlign: "center",
+            color: theme.customColors.lightBlue,
+            // color: '#795B4A',
+            // textAlign: 'center',
+            // fontWeight: 'bold',
+            // mb: 3
           }}
         >
-          Welcome back to Personal Finance
+          Welcome Back
         </Typography>
 
         <TextField
@@ -76,7 +89,6 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
           error={!!errors.email}
           helperText={errors.email?.message}
           fullWidth
-          required
         />
         <TextField
           label="Password"
@@ -85,13 +97,15 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
           error={!!errors.password}
           helperText={errors.password?.message}
           fullWidth
-          required
         />
         <Button
           type="submit"
           variant="contained"
           color="primary"
-          sx={{ width: "fit-content" }}
+          sx={{ 
+            backgroundColor: theme.customColors.lightBlue,
+            "&:hover": { backgroundColor: theme.customColors.hoverBlue }, 
+          }}
         >
           Sign In
         </Button>
@@ -105,19 +119,31 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
         }}>
           <Link
             component="button"
-            variant="body2"
+            variant="body1"
             onClick={() => setIsForgotPasswordOpen(true)}
-            sx={{ color: '#795B4A' }}
+            sx={{ 
+              color: theme.customColors.lightBlue,
+              textDecoration: "none",
+            }}
           >
             Forgot password?
           </Link>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+
+          <Typography 
+          variant="body1" 
+          sx={{ 
+            textAlign: "center",
+              color: theme.palette.text.secondary,
+            }}>
             Don't have an account?{' '}
             <Link
               component="button"
-              variant="body2"
+              variant="body1"
               onClick={() => setIsLoginPage(false)}
-              sx={{ color: '#795B4A' }}
+              sx={{ 
+                color: theme.customColors.lightBlue,
+                textDecoration: "none",
+              }}
             >
               Sign up
             </Link>

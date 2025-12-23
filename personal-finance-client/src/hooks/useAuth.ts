@@ -191,7 +191,7 @@ export const useAuth = () => {
 
   const requestPasswordReset = async (email: string) => {
     try {
-      await API.post('/users/password/reset-request', { email });
+      await API.post('/users/password/request-reset', { email });
       return { success: true };
     } catch (error: any) {
       return { 
@@ -203,7 +203,7 @@ export const useAuth = () => {
 
   const verifyResetCode = async (email: string, code: string) => {
     try {
-      await API.post('/users/password/verify-reset-code', { email, code });
+      await API.post('/users/password/verify-code-reset', { email, code });
       return { success: true };
     } catch (error: any) {
       return { 

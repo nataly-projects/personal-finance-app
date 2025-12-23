@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -7,8 +7,10 @@ import {
   TextField,
   Button,
   Typography,
-  Alert
+  Alert,
+  Box
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../hooks/useAuth';
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -44,7 +46,9 @@ const passwordSchema = yup.object().shape({
     .required("Please confirm your password"),
 });
 
-const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClose }) => {
+const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, onClose }) => {
+
+  const theme = useTheme();
   const { requestPasswordReset, verifyResetCode, resetPassword } = useAuth();
   const [code, setCode] = useState("");
   const [isRequesting, setIsRequesting] = useState(false);
@@ -134,23 +138,15 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Reset Your Password</DialogTitle>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ backgroundColor: theme.customColors.lightBlue, color: '#fff', textAlign: 'center' }}>
+        Reset Your Password
+      </DialogTitle>
       <DialogContent>
-        {serverError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {serverError}
-          </Alert>
-        )}
-        {serverMessage && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {serverMessage}
-          </Alert>
-        )}
-
+        
         {resetStep === 'email' && (
           <form onSubmit={emailForm.handleSubmit(handleRequestReset)}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ m: 1 }}>
               Enter your email address and we'll send you a reset code.
             </Typography>
             <TextField
@@ -165,10 +161,17 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
               disabled={isRequesting}
             />
             <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-              <Button 
+              <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
+                Cancel
+              </Button>
+             <Button 
                 type="submit"
                 disabled={isRequesting || !emailForm.watch('email')?.trim()}
+                sx={{
+                  backgroundColor: theme.customColors.lightBlue,
+                  color: '#fff',
+                  '&:hover': { backgroundColor: theme.customColors.hoverBlue },
+                }}
               >
                 {isRequesting ? "Sending..." : "Send Code"}
               </Button>
@@ -178,7 +181,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
 
         {resetStep === 'code' && (
           <>
-            <Typography variant="body2" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ m: 1 }}>
               Enter the reset code sent to your email.
             </Typography>
             <TextField
@@ -191,10 +194,17 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
               disabled={isRequesting}
             />
             <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
+              <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
+                Cancel
+              </Button>
               <Button 
                 onClick={handleVerifyCode} 
                 disabled={isRequesting || !code}
+                sx={{
+                  backgroundColor: theme.customColors.lightBlue,
+                  color: '#fff',
+                  '&:hover': { backgroundColor: theme.customColors.hoverBlue },
+                }}
               >
                 {isRequesting ? "Verifying..." : "Verify Code"}
               </Button>
@@ -204,7 +214,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
 
         {resetStep === 'new-password' && (
           <form onSubmit={passwordForm.handleSubmit(handleResetPassword)}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ m: 1 }}>
               Enter your new password.
             </Typography>
             <TextField
@@ -229,19 +239,36 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
               disabled={isRequesting}
             />
             <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-              <Button 
+              <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
+                Cancel
+              </Button>
+             <Button 
                 type="submit"
                 disabled={isRequesting}
+                sx={{
+                  backgroundColor: theme.customColors.lightBlue,
+                  color: '#fff',
+                  '&:hover': { backgroundColor: theme.customColors.hoverBlue },
+                }}
               >
                 {isRequesting ? "Resetting..." : "Reset Password"}
               </Button>
             </DialogActions>
           </form>
         )}
+        {serverError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {serverError}
+          </Alert>
+        )}
+        {serverMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {serverMessage}
+          </Alert>
+        )}
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default ForgotPasswordDialog; 
