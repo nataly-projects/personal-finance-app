@@ -1,57 +1,25 @@
 import React, { useState } from 'react';
-import { Container, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Box } from '@mui/material';
+import { Container, Typography, Button, TextField, Box, CircularProgress, Alert } from '@mui/material';
 import { useTasks } from '../hooks/useTasks';
-import { useModal } from '../hooks/useModal';
+import AddTaskModal from '../components/AddTaskModal';
 import TasksTable from '../components/TasksTable';
+import { useModal } from '../hooks/useModal';
 import { Task } from '../utils/types';
 
-type TaskStatus = 'pending' | 'completed';
 
 const TasksPage: React.FC = () => {
-  const { tasks, loading, error, addTask, updateTask, deleteTask } = useTasks();
+  const { tasks, loading, error, updateTask, deleteTask } = useTasks();
   const { isOpen, openModal, closeModal } = useModal();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-    status: 'pending' as TaskStatus,
-  });
 
-  const handleClose = () => {
-    closeModal();
+  const handleAddNew = () => {
     setSelectedTask(null);
-    setFormData({
-      title: '',
-      description: '',
-      dueDate: '',
-      status: 'pending',
-    });
+    openModal();
   };
 
-  const handleAddTask = async () => {
-    try {
-      const newTask = {
-        title: formData.title,
-        description: formData.description,
-        dueDate: formData.dueDate ? new Date(formData.dueDate) : null,
-        status: formData.status,
-        completed: false,
-        userId: '', 
-        createdAt: new Date(),
-        updatedAt: null,
-      };
-
-      if (selectedTask) {
-        await updateTask(selectedTask._id, newTask);
-      } else {
-        await addTask(newTask);
-      }
-
-      handleClose();
-    } catch (err) {
-      console.error('Error saving task:', err);
-    }
+  const handleEdit = (task: Task) => {
+    setSelectedTask(task);
+    openModal();
   };
 
   const handleDelete = async (id: string) => {
@@ -59,43 +27,32 @@ const TasksPage: React.FC = () => {
       try {
         await deleteTask(id);
       } catch (err) {
-        console.error('Error deleting task:', err);
       }
     }
   };
-  
-  const handleEdit = (task: Task) => {
-    setSelectedTask(task);
-    setFormData({
-      title: task.title,
-      description: task.description,
-      dueDate: task.dueDate ? task.dueDate.toISOString().split('T')[0] : '',
-      status: task.status as TaskStatus,
-    });
-    openModal();
-  };
+
 
   const handleToggleComplete = async (task: Task) => {
     try {
-      await updateTask(task._id, {
+      const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+      await updateTask({id: task._id, data:{
       ...task,
-      completed: !task.completed,
-        status: !task.completed ? 'completed' : 'pending' as const,
+      completed: newStatus === 'completed',
+      status: newStatus,
       updatedAt: new Date()
-      });
+      }});
     } catch (err) {
-      console.error('Error toggling task completion:', err);
     }
   };
 
     if (loading) {
-    return <Typography>Loading...</Typography>;
-    }
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+          <CircularProgress />
+        </Box>
+      );
+  }
   
-    if (error) {
-    return <Typography color="error">{error}</Typography>;
-    }
-
   return (
     <Container>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -103,9 +60,10 @@ const TasksPage: React.FC = () => {
         Tasks
       </Typography>
         <Button variant="contained" color="primary" onClick={openModal}>
-          Add Task
+          Add New Task
         </Button>
       </Box>
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error.toString()}</Alert>}
 
       <TasksTable
         tasks={tasks}
@@ -114,55 +72,11 @@ const TasksPage: React.FC = () => {
         onToggleComplete={handleToggleComplete}
       />
 
-      <Dialog open={isOpen} onClose={handleClose}>
-        <DialogTitle>{selectedTask ? 'Edit Task' : 'Add New Task'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Title"
-            fullWidth
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            fullWidth
-            multiline
-            rows={4}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Due Date"
-            type="date"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={formData.dueDate}
-            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Status"
-            select
-            fullWidth
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value as TaskStatus })}
-            SelectProps={{ native: true }}
-          >
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </TextField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAddTask} color="primary">
-            {selectedTask ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddTaskModal
+        open={isOpen}
+        onClose={closeModal}
+        selectedTask={selectedTask}
+      />
     </Container>
   );
 };

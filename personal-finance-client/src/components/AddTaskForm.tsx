@@ -13,12 +13,15 @@ const schema = yup.object().shape({
   status: yup.string().oneOf(["pending", "completed"]).default("pending")
 });
 
-const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose, onSave, task }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose, onSuccess, task }) => {
+  const [error, setError] = useState<string | null>(null);
   
-  const { register, handleSubmit,setValue, 
-    formState: { errors }, reset } = useForm<TaskFormData>({
+  const { 
+    register, 
+    handleSubmit,
+    setValue, 
+    reset,
+    formState: { errors, isSubmitting } } = useForm<TaskFormData>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
       status: 'pending',
@@ -32,24 +35,24 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose, onSave, task }) => {
       if (task) {
         setValue("title", task.title);
         setValue("description", task.description);
-        setValue("dueDate", task?.dueDate ? new Date(task.dueDate) : null);
+        if (task.dueDate) {
+        const date = new Date(task.dueDate);
+        setValue("dueDate", date.toISOString().split('T')[0] as any);
+        } 
       }
     }, [task, setValue]);
 
-  const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
+    const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
       try {
-        setIsSubmitting(true);
         setError(null);
-        if (onSave) {
-          onSave(data);
-        }
+        onSuccess(data);
+        setError(null);
         reset();
-      } catch (err) {
-        console.error("Error adding task:", err);
-        setError("Failed to add task. Please try again.");
-      } finally {
-        setIsSubmitting(false);
-      }
+        onClose();
+      } catch (err: any) {
+        const msg = err.response?.data?.message || "Something went wrong";
+        setError(msg);
+      } 
   };
 
   const handleCancel = () => {

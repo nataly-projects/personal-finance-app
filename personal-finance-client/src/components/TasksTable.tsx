@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { IconButton, Box, Button } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -6,6 +6,7 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Task } from '../utils/types';
+import { useModal } from '../hooks/useModal';
 
 interface TasksTableProps {
   tasks: Task[];
@@ -15,9 +16,18 @@ interface TasksTableProps {
   handleOpenAddDialog?: () => void;
 }
 
-const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit, onDelete, handleOpenAddDialog }) => {
+const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onDelete, handleOpenAddDialog }) => {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const { isOpen, openModal, closeModal } = useModal();
+  
+
+  const onEdit = useCallback((task: Task) => {
+  //   handleEdit(transaction);
+      setSelectedTask(task);
+      openModal();
+  }, [openModal]);
     
-  const columns: GridColDef[] = [
+  const columns = useMemo<GridColDef[]>(() => [
     {
       field: 'completed',
       headerName: 'Status',
@@ -50,8 +60,8 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
       flex: 1,
       headerAlign: 'center',
       align: 'center',
-      valueFormatter: (params) => 
-        params ? new Date(params).toLocaleDateString() : 'N/A'
+      valueFormatter: (value: Date) => 
+        value instanceof Date ? value.toLocaleDateString('he-IL') : 'N/A'
 
     },
     {
@@ -78,7 +88,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, onToggleComplete, onEdit
         </Box>
       ),
     },
-  ];
+  ], [onToggleComplete, onEdit, onDelete]);
 
   return (
     <Box sx={{ height: 400, width: '100%' }}>

@@ -32,6 +32,13 @@ const emailSchema = yup.object().shape({
     ),
 });
 
+const codeSchema = yup.object().shape({
+  code: yup
+    .string()
+    .required("Verification code is required")
+    .min(6, "Code is too short") 
+});
+
 const passwordSchema = yup.object().shape({
   newPassword: yup
     .string()
@@ -49,16 +56,22 @@ const passwordSchema = yup.object().shape({
 const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, onClose }) => {
 
   const theme = useTheme();
-  const { requestPasswordReset, verifyResetCode, resetPassword } = useAuth();
-  const [code, setCode] = useState("");
-  const [isRequesting, setIsRequesting] = useState(false);
+  const { passwordResetRequest, isRequestingCode, requestError, verifyResetCode, isVerifyingCode, verifyError, resetPassword, isResettingPassword, resetError, forgetPasswordAuthForms } = useAuth();
+
   const [resetStep, setResetStep] = useState<'email' | 'code' | 'new-password'>('email');
-  const [serverError, setServerError] = useState<string | null>(null);
   const [serverMessage, setServerMessage] = useState<string | null>(null);
+
+  const currentError = requestError || verifyError || resetError;
+  const isLoading = isRequestingCode || isVerifyingCode || isResettingPassword;
 
   const emailForm = useForm({
     resolver: yupResolver(emailSchema),
     mode: "onChange"
+  });
+
+  const codeForm = useForm({ 
+    resolver: yupResolver(codeSchema),
+    defaultValues: { code: "" } 
   });
 
   const passwordForm = useForm({
@@ -67,74 +80,52 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
 
   const handleRequestReset = async (data: { email: string }) => {
     try {
-      setServerError(null);
       setServerMessage(null);
-      setIsRequesting(true);
-      const result = await requestPasswordReset(data.email);
-      if (result.success) {
-        setServerMessage("Reset code has been sent to your email");
-        setResetStep('code');
-      } else {
-        setServerError(result.error || "Failed to send reset code");
-      }
-    } catch (error) {
+      await passwordResetRequest(data.email);
+      setServerMessage("Reset code has been sent to your email");
+      setResetStep('code');
+    } catch (error: any) {
       console.error(error);
-      setServerError("Failed to send reset code");
-    } finally {
-      setIsRequesting(false);
     }
   };
 
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = async (data: { code: string }) => {
     try {
-      setServerError(null);
       setServerMessage(null);
-      setIsRequesting(true);
-      const result = await verifyResetCode(emailForm.getValues('email'), code);
-      if (result.success) {
-        setServerMessage("Code verified successfully");
-        setResetStep('new-password');
-      } else {
-        setServerError(result.error || "Invalid code");
-      }
-    } catch (error) {
+      const email = emailForm.getValues('email');
+      await verifyResetCode({email, code: data.code});
+      setServerMessage("Code verified successfully");
+      setResetStep('new-password');
+    } catch (error: any) {
       console.error(error);
-      setServerError("Failed to verify code");
-    } finally {
-      setIsRequesting(false);
-    }
+    } 
   };
 
   const handleResetPassword = async (data: { newPassword: string, confirmPassword: string }) => {
     try {
-      setServerError(null);
       setServerMessage(null);
-      setIsRequesting(true);
-      const result = await resetPassword(emailForm.getValues('email'), code, data.newPassword);
-      if (result.success) {
-        setServerMessage("Password has been reset successfully");
+      await resetPassword({
+        email: emailForm.getValues('email'),
+        code: codeForm.getValues('code'), 
+        newPassword: data.newPassword
+      });
+       setServerMessage("Password has been reset successfully");
         setTimeout(() => {
           handleClose();
         }, 2000);
-      } else {
-        setServerError(result.error || "Failed to reset password");
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setServerError("Failed to reset password");
-    } finally {
-      setIsRequesting(false);
-    }
+    } 
   };
 
   const handleClose = () => {
     onClose();
     setResetStep('email');
-    setCode("");
-    setServerError(null);
     setServerMessage(null);
     emailForm.reset();
+    codeForm.reset();
     passwordForm.reset();
+    forgetPasswordAuthForms();
   };
 
   return (
@@ -158,7 +149,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               {...emailForm.register("email")}
               error={!!emailForm.formState.errors.email}
               helperText={emailForm.formState.errors.email?.message}
-              disabled={isRequesting}
+              disabled={isLoading}
             />
             <DialogActions>
               <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
@@ -166,21 +157,21 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               </Button>
              <Button 
                 type="submit"
-                disabled={isRequesting || !emailForm.watch('email')?.trim()}
+                disabled={isLoading || !emailForm.watch('email')?.trim()}
                 sx={{
                   backgroundColor: theme.customColors.lightBlue,
                   color: '#fff',
                   '&:hover': { backgroundColor: theme.customColors.hoverBlue },
                 }}
               >
-                {isRequesting ? "Sending..." : "Send Code"}
+                {isLoading ? "Sending..." : "Send Code"}
               </Button>
             </DialogActions>
           </form>
         )}
 
         {resetStep === 'code' && (
-          <>
+          <form onSubmit={codeForm.handleSubmit(handleVerifyCode)}>
             <Typography variant="body1" sx={{ m: 1 }}>
               Enter the reset code sent to your email.
             </Typography>
@@ -189,27 +180,29 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               margin="dense"
               label="Reset Code"
               fullWidth
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              disabled={isRequesting}
+              {...codeForm.register("code")}
+              error={!!codeForm.formState.errors.code}
+              helperText={codeForm.formState.errors.code?.message}
+              disabled={isLoading}
+              inputProps={{ style: { textAlign: 'center', letterSpacing: '0.3em', fontSize: '1.2rem' } }}
             />
             <DialogActions>
               <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
                 Cancel
               </Button>
               <Button 
-                onClick={handleVerifyCode} 
-                disabled={isRequesting || !code}
+                type="submit"
+                disabled={isLoading}
                 sx={{
                   backgroundColor: theme.customColors.lightBlue,
                   color: '#fff',
                   '&:hover': { backgroundColor: theme.customColors.hoverBlue },
                 }}
               >
-                {isRequesting ? "Verifying..." : "Verify Code"}
+                {isLoading ? "Verifying..." : "Verify Code"}
               </Button>
             </DialogActions>
-          </>
+          </form>
         )}
 
         {resetStep === 'new-password' && (
@@ -226,7 +219,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               {...passwordForm.register("newPassword")}
               error={!!passwordForm.formState.errors.newPassword}
               helperText={passwordForm.formState.errors.newPassword?.message}
-              disabled={isRequesting}
+              disabled={isLoading}
             />
             <TextField
               margin="dense"
@@ -236,7 +229,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               {...passwordForm.register("confirmPassword")}
               error={!!passwordForm.formState.errors.confirmPassword}
               helperText={passwordForm.formState.errors.confirmPassword?.message}
-              disabled={isRequesting}
+              disabled={isLoading}
             />
             <DialogActions>
               <Button onClick={handleClose} sx={{ color: theme.customColors.lightBlue }}>
@@ -244,21 +237,21 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = memo(({ open, 
               </Button>
              <Button 
                 type="submit"
-                disabled={isRequesting}
+                disabled={isLoading}
                 sx={{
                   backgroundColor: theme.customColors.lightBlue,
                   color: '#fff',
                   '&:hover': { backgroundColor: theme.customColors.hoverBlue },
                 }}
               >
-                {isRequesting ? "Resetting..." : "Reset Password"}
+                {isLoading ? "Resetting..." : "Reset Password"}
               </Button>
             </DialogActions>
           </form>
         )}
-        {serverError && (
+        {currentError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {serverError}
+            {(currentError as any).response?.data?.message || "Operation failed"}
           </Alert>
         )}
         {serverMessage && (

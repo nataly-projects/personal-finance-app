@@ -13,6 +13,10 @@ export const store = configureStore({
     transactions: transactionsReducer,
     tasks: tasksReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // זה ישתיק את השגיאה שראית בקונסול
+  }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

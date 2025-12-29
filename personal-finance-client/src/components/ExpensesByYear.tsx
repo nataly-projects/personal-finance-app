@@ -1,9 +1,11 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useTheme } from "@mui/material/styles";
 import {ExpensesProps} from "../utils/types.js";
 
 const ExpensesByYear: React.FC<ExpensesProps> = ({ data }) => {
-  // סיכום נתונים לפי שנה
+  const theme = useTheme();
+
   const yearlyExpenses = data.reduce<Record<number, number>>((acc, txn) => {
     if (txn.type === "expense") {
       const year = new Date(txn.date).getFullYear();
@@ -20,10 +22,16 @@ const ExpensesByYear: React.FC<ExpensesProps> = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={chartData}>
-        <XAxis dataKey="year" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="expense" fill="#ff8042" />
+        <XAxis dataKey="year" stroke={theme.palette.text.secondary}/>
+        <YAxis stroke={theme.palette.text.secondary} />
+        <Tooltip 
+          contentStyle={{ backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary }} 
+        />
+        <Bar 
+          dataKey="expense" 
+          fill={theme.palette.error.main} 
+          radius={[4, 4, 0, 0]} 
+        />
       </BarChart>
     </ResponsiveContainer>
   );

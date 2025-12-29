@@ -11,16 +11,10 @@ import {
   DeleteTransactionResponse
 } from '@shared/types/transaction';
 import {sendOutcomeLimitExceededEmail} from '../services/mailService';
-import { Category } from '@/models/Category';
 import { ApiError } from '../utils/utils';
 import { asyncHandler } from '../middleware/errorMiddleware';
+import { AuthenticatedRequest } from '../utils/types';
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-  };
-}
 
 const checkAndNotifyBudgetLimit = async ({
   user,
@@ -70,7 +64,6 @@ export const addTransaction = asyncHandler(async (req: AuthenticatedRequest, res
   const userId = req.user.id;
   const { amount, category, type, description, date } = req.body as AddTransactionRequest;
 
-  // 1. Validation using ApiError
   if (!amount || !category || !type || !description || !date) {
     logger.warn("Add transaction failed: Missing fields");
     throw new ApiError(400, "All fields are required");

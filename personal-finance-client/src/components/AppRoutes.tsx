@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSelector } from "react-redux";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+
 import { RootState } from "../store/store";
 import SignupLoginPage from '../pages/SignupLoginPage';
 import HomePage from "../pages/HomePage";
@@ -8,27 +10,23 @@ import ReportsPage from "../pages/ReportsPage";
 import TasksPage from "../pages/TasksPage";
 import TransactionsPage from "../pages/TransactionsPage";
 import SettingsPage from "../pages/SettingsPage";
-import UserMainPage from "../pages/UserMainPage";
 import ProfilePage from "../pages/ProfilePage";
+import Layout from './Layout';
+
 
 const AppRoutes: React.FC = () => {
-    const user = useSelector((state: RootState) => state.auth.user);
-    const token = useSelector((state: RootState) => state.auth.token);
-    const location = useLocation();
-
-    if ((!user || !token) && location.pathname !== '/login') {
-        return <Navigate to="/login" replace />;
-    }
+    const { user, token } = useSelector((state: RootState) => state.auth);
+    const isAuthenticated = !!(user && token);
 
     return (
         <Routes>
-            {(!user || !token) ? (
+            {!isAuthenticated ? (
                 <>
                     <Route path="/login" element={<SignupLoginPage />} />
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </>
             ) : (
-                <Route element={<UserMainPage />}>
+                <Route element={<Layout><Outlet /></Layout>}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/transactions" element={<TransactionsPage />} />
                     <Route path="/reports" element={<ReportsPage />} />

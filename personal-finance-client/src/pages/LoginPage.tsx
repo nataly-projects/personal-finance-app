@@ -16,7 +16,7 @@ const schema = yup.object().shape({
 
 const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => void }) => {
 
-  const { login } = useAuth();
+  const { login, isLoggingIn, loginError } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = React.useState(false);
@@ -31,7 +31,7 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const result = await login(data.email, data.password);
+      const result = await login({email: data.email, password: data.password});
       if (result.success) {
         navigate('/', { replace: true });
       } else {
@@ -102,12 +102,13 @@ const LoginPage = ({ setIsLoginPage }: { setIsLoginPage: (isLogin: boolean) => v
           type="submit"
           variant="contained"
           color="primary"
+          disabled={isLoggingIn}
           sx={{ 
             backgroundColor: theme.customColors.lightBlue,
             "&:hover": { backgroundColor: theme.customColors.hoverBlue }, 
           }}
         >
-          Sign In
+          {isLoggingIn ? "Signing In..." : "Sign In"}
         </Button>
 
         <Box sx={{ 

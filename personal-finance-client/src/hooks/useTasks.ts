@@ -1,107 +1,71 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store/store';
-import { 
-  setTasks, 
-  addTask, 
-  updateTask, 
-  deleteTask,
-  setLoading,
-  setError,
-  setOperationLoading
-} from '../store/tasksSlice';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {Task} from '../utils/types'
 import API from '../services/api';
 
-const parseTaskDates = (task: Task): Task => ({
-  ...task,
-  dueDate: task.dueDate ? new Date(task.dueDate) : null
-});
-
 export const useTasks = () => {
-  const dispatch = useDispatch();
-  const { items: tasks, loading, error, operationLoading } = useSelector((state: RootState) => state.tasks);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchTasks = useCallback(async () => {
-    try {
-      dispatch(setLoading(true));
-      dispatch(setError(null));
+  const { data: tasks = [], isLoading: loading, error } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
       const response = await API.get('/tasks');
-      dispatch(setTasks(response.data.tasks));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error loading tasks';
-      dispatch(setError(errorMessage));
-      setLocalError(errorMessage);
-    } finally {
-      dispatch(setLoading(false));
+      return response.data.tasks.map((task: Task) => ({
+        ...task,
+        dueDate: task.dueDate ? new Date(task.dueDate) : null
+      }));
     }
-  }, [dispatch]);
+  });
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
-
-  const addNewTask = async (taskData: Omit<Task, '_id'>) => {
-    try {
-      dispatch(setOperationLoading({ operation: 'add', loading: true }));
-      dispatch(setError(null));
-      const response = await API.post('/tasks', taskData);
-      dispatch(addTask(response.data));
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error adding task';
-      dispatch(setError(errorMessage));
-      setLocalError(errorMessage);
-      throw err;
-    } finally {
-      dispatch(setOperationLoading({ operation: 'add', loading: false }));
+  const addMutation = useMutation({
+    mutationFn: (newTask: Omit<Task, '_id'>) => API.post('/tasks', newTask),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: any) => {
+      console.error("Add task failed:", error.response?.data?.message || error.message);
     }
-  };
+  });
 
-  const updateExistingTask = async (taskId: string, taskData: Partial<Task>) => {
-    try {
-      dispatch(setOperationLoading({ operation: 'update', loading: true }));
-      dispatch(setError(null));
-      const response = await API.put(`/tasks/${taskId}`, taskData);
-      dispatch(updateTask(response.data));
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error updating task';
-      dispatch(setError(errorMessage));
-      setLocalError(errorMessage);
-      throw err;
-    } finally {
-      dispatch(setOperationLoading({ operation: 'update', loading: false }));
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Task> }) => 
+      API.put(`/tasks/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: any) => {
+      console.error("Upsate task failed:", error.response?.data?.message || error.message);
     }
-  };
+  });
 
-  const deleteExistingTask = async (taskId: string) => {
-    try {
-      dispatch(setOperationLoading({ operation: 'delete', loading: true }));
-      dispatch(setError(null));
-      await API.delete(`/tasks/${taskId}`);
-      dispatch(deleteTask(taskId));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error deleting task';
-      dispatch(setError(errorMessage));
-      setLocalError(errorMessage);
-      throw err;
-    } finally {
-      dispatch(setOperationLoading({ operation: 'delete', loading: false }));
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => API.delete(`/tasks/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: any) => {
+      console.error("Delete task failed:", error.response?.data?.message || error.message);
     }
-  };
+  });
 
-  const parsedTasks = tasks.map(parseTaskDates);
+
 
   return {
-    tasks: parsedTasks,
+    tasks,
     loading,
-    error: error || localError,
-    operationLoading,
-    addTask: addNewTask,
-    updateTask: updateExistingTask,
-    deleteTask: deleteExistingTask,
-    refreshTasks: fetchTasks
+    error,
+    addTask: addMutation.mutateAsync,
+    isAdding: addMutation.isPending,
+    addError: addMutation.error, 
+
+    updateTask:  updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    updateError: updateMutation.error,
+
+    deleteTask: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
+    deleteError: deleteMutation.error,
   };
 };

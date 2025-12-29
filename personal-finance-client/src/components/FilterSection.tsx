@@ -1,96 +1,74 @@
 import React from 'react';
-import { IconButton, Select, MenuItem, TextField, InputAdornment, FormControl, InputLabel, Input, Box } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilter } from '@fortawesome/free-solid-svg-icons';
+import { 
+  Box, Select, MenuItem, TextField, FormControl, 
+  InputLabel, Stack, Tooltip, IconButton, Paper
+} from '@mui/material';
+import { 
+  FilterAltOff as FilterOffIcon, 
+} from '@mui/icons-material';
 import { FilterSectionProps } from '../utils/types';
+
 
 const FilterSection: React.FC<FilterSectionProps> = ({
   filterType, handleTypeChange, startDate, handleStartDateChange, endDate, 
-    handleEndDateChange, handleMinAmountChange, minAmount, selectOptions, isExpenseFilter 
+    handleEndDateChange, handleMinAmountChange, minAmount, selectOptions, isExpenseFilter, onReset
 }) => {
   return (
-    <Box 
-      display="flex"
-      gap={2}
-      mb={2}
-      sx={{ width: '100%' }}
-    >
-      {/* Filter Type */}
-      <FormControl variant="standard" size="small" sx={{ minWidth: 120 }}>
-        <InputLabel>Type</InputLabel>
-        <Select
-          value={filterType}
-          onChange={handleTypeChange}
-          input={<Input />}
-        >
-          <MenuItem value="">All</MenuItem>
-          {Object.entries(selectOptions).map(([key, value]) => (
-            <MenuItem key={key} value={value}>{value}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <Paper elevation={0} sx={{ p: 2, mb: 3, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
+        
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            label="Category"
+            value={filterType}
+            onChange={handleTypeChange}
+          >
+            <MenuItem value="">All Categories</MenuItem>
+            {Object.entries(selectOptions).map(([key, value]) => (
+              <MenuItem key={key} value={value}>{value}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      {/* Start Date */}
-      <FormControl variant="standard" size="small">
         <TextField
-          label="Start Date"
+          label="From"
           type="date"
+          size="small"
           value={startDate}
           onChange={handleStartDateChange}
           InputLabelProps={{ shrink: true }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton size="small">
-                  <FontAwesomeIcon icon={faFilter} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
         />
-      </FormControl>
 
-      {/* End Date */}
-      <FormControl variant="standard" size="small">
         <TextField
-          label="End Date"
+          label="To"
           type="date"
+          size="small"
           value={endDate}
           onChange={handleEndDateChange}
           InputLabelProps={{ shrink: true }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton size="small">
-                  <FontAwesomeIcon icon={faFilter} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
         />
-      </FormControl>
 
-      {/* Min Amount (only if isExpenseFilter is true) */}
-      {isExpenseFilter && (
-        <FormControl variant="standard" size="small">
+        {isExpenseFilter && (
           <TextField
             label="Min Amount"
             type="number"
+            size="small"
             value={minAmount}
             onChange={handleMinAmountChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton size="small">
-                    <FontAwesomeIcon icon={faFilter} />
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
+            sx={{ width: 130 }}
           />
-        </FormControl>
-      )}
-    </Box>
+        )}
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Tooltip title="Clear All Filters">
+          <IconButton onClick={onReset} color="secondary">
+            <FilterOffIcon />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+    </Paper>
   );
 };
 

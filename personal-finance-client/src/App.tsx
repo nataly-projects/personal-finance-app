@@ -1,16 +1,16 @@
 import React from 'react';
-import { CssBaseline } from '@mui/material';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { useTheme } from './hooks/useTheme';
 import AppRoutes from './components/AppRoutes';
 
 const App: React.FC = () => {
+  const { theme } = useTheme();
 
   return (
-    <Provider store={store}>
+    <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppRoutes />
-    </Provider>
+    </ThemeProvider>
   );
 };
 

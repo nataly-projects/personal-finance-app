@@ -1,244 +1,141 @@
-import { useState, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { login as setUser, logout as clearUser } from '../store/authSlice';
-import { User } from '../utils/types';
-import { safeJSONParse } from '../utils/utils';
+import { RootState } from '../store/store'; 
 import API from '../services/api';
+import { User } from '../utils/types';
+import { AxiosError } from 'axios';
 
-
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  error: string | null;
+interface ResetPasswordParams {
+  email: string;
+  code: string;
+  newPassword: string;
 }
 
 export const useAuth = () => {
-  const [auth, setAuth] = useState<AuthState>(() => {
-    const token = localStorage.getItem('token');
-    const user = safeJSONParse<User>(localStorage.getItem('user'));
-
-    return {
-      token: token || null,
-      user: user || null,
-      loading: false,
-      error: null
-    };
-  });
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  const { user, token } = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
-    if (auth.token) {
-      localStorage.setItem('token', auth.token);
-      API.defaults.headers.common['Authorization'] = `Bearer ${auth.token}`;
+  const updateAuthData = (user: User | null, token: string | null) => {
+    if (token && user) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      dispatch(setUser({ user, token }));
     } else {
       localStorage.removeItem('token');
-      delete API.defaults.headers.common['Authorization'];
-    }
-  }, [auth.token]);
-
-  useEffect(() => {
-    if (auth.user) {
-      const userForStorage = {
-        ...auth.user,
-        createdAt: auth.user.createdAt?.toString() || null,
-        updatedAt: auth.user.updatedAt?.toString() || null
-      };
-      localStorage.setItem('user', JSON.stringify(userForStorage));
-      dispatch(setUser({user: auth.user, token: auth?.token || ''}));
-    } else {
       localStorage.removeItem('user');
-      dispatch(setUser({ user: {
-        id: '',
-        email: '',
-        fullName: '',
-        createdAt: null,
-        updatedAt: null
-      }, token: '' }));
+      delete API.defaults.headers.common['Authorization'];
+      dispatch(clearUser());
     }
-  }, [auth.user, auth.token, dispatch]);
+  };
 
-  const login = async (email: string, password: string) => {
-    try {
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: any) => {
       const response = await API.post('/users/login', { email, password });
-      const { token, user } = response.data;
-      
-      const userWithDates = {
-        ...user,
-        createdAt: user.createdAt ? new Date(user.createdAt) : null,
-        updatedAt: user.updatedAt ? new Date(user.updatedAt) : null
-      };
-
-      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setAuth({ 
-        token, 
-        user: userWithDates,
-        loading: false,
-        error: null
-      });
-
-      dispatch(setUser({ user: userWithDates, token }));
-
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed'
-      };
+      return response.data;
+    },
+    onSuccess: (data) => {
+      updateAuthData(data.user, data.token);
+      navigate('/dashboard');    
     }
-  };
+  });
 
-  const register = async (email: string, password: string, fullName: string) => {
-    try {
-      const response = await API.post('/users/register', { email, password, fullName });
-      const { token, user } = response.data;
-      
-      const userWithDates = {
-        ...user,
-        createdAt: user.createdAt ? new Date(user.createdAt) : null,
-        updatedAt: user.updatedAt ? new Date(user.updatedAt) : null
-      };
-
-      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setAuth({ 
-        token, 
-        user: userWithDates,
-        loading: false,
-        error: null
-      });
-
-      dispatch(setUser({ user: userWithDates, token }));
-
-
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Registration failed'
-      };
+  const registerMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const response = await API.post('/users/register', userData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      updateAuthData(data.user, data.token);
     }
-  };
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: { name: string; email: string }) => {
+      const response = await API.put('/users/profile', profileData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // עדכון ה-Redux וה-LocalStorage עם הנתונים החדשים
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = { ...currentUser, ...data.user };
+      updateAuthData(updatedUser, localStorage.getItem('token'));
+    }
+  });
 
   const logout = () => {
-    delete API.defaults.headers.common['Authorization'];
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setAuth({ 
-      token: null, 
-      user: null,
-      loading: false,
-      error: null
-    });
-    dispatch(clearUser());
+    updateAuthData(null, null);
     navigate('/login', { replace: true });
   };
 
-  const requestPasswordUpdate = async () => {
-    try {
-      await API.post('/users/password/request-update');
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error requesting password update'
-      };
-    }
-  };
+  const passwordRequestMutation = useMutation({
+    mutationFn: () => API.post('/users/password/request-update')
+  });
 
-  const verifyPasswordUpdateCode = async (code: string) => {
-    try {
-      await API.post('/users/password/verify-code', { code });
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error verifying code'
-      };
+  const passwordVerifyMutation = useMutation({
+    mutationFn: (code: string) => API.post('/users/password/verify-code-update', { code }),
+    onError: (error: any) => {
+      console.error("Verification failed:", error.response?.data?.error);
     }
-  };
+  });
 
-  const updatePassword = async (currentPassword: string, newPassword: string, verificationCode: string) => {
-    try {
-      await API.put('/users/password', {
-        currentPassword,
-        newPassword,
-        verificationCode
-      });
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error updating password'
-      };
+  const passwordUpdateMutation = useMutation({
+    mutationFn: (data: any) => API.put('/users/password/update', data),
+    onError: (error: any) => {
+      console.error("Update password failed:", error.response?.data?.error);
     }
-  };
+  });
 
-  const updateProfile = async (profileData: { name: string; email: string;}) => {
-    try {
-      const response = await API.put('/users/profile', profileData);
-      dispatch(setUser(response.data.user));
-      return response.data;
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      throw new Error(error.response?.data?.message || 'Error updating profile');
-    }
-  };
 
-  const requestPasswordReset = async (email: string) => {
-    try {
-      await API.post('/users/password/request-reset', { email });
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error requesting password reset'
-      };
-    }
-  };
+const passwordResetRequestMutation = useMutation({
+    mutationFn: (email: string) => API.put('/users/password/request-reset', email)
+  });
 
-  const verifyResetCode = async (email: string, code: string) => {
-    try {
-      await API.post('/users/password/verify-code-reset', { email, code });
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error verifying reset code'
-      };
-    }
-  };
+const verifyResetCodeMutation = useMutation({
+    mutationFn: ({email, code}: {email: string, code: string}) => API.put('/users/password/verify-code-reset', {email, code})
+  });
 
-  const resetPassword = async (email: string, code: string, newPassword: string) => {
-    try {
-      await API.post('/users/password/reset', { email, code, newPassword });
-      return { success: true };
-    } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Error resetting password'
-      };
-    }
-  };
+
+const passwordResetMutation = useMutation({
+    mutationFn: (resetData: ResetPasswordParams) => API.put('/users/password/reset', resetData)
+  });
 
   return {
-    user: auth.user,
-    token: auth.token,
-    loading: auth.loading,
-    error: auth.error,
-    login,
-    register,
+    user,
+    token,
+    login: loginMutation.mutateAsync,
+    isLoggingIn: loginMutation.isPending,
+    loginError: loginMutation.error as AxiosError,
+
+    register: registerMutation.mutateAsync,
     logout,
-    requestPasswordUpdate,
-    verifyPasswordUpdateCode,
-    updatePassword,
-    updateProfile,
-    requestPasswordReset,
-    verifyResetCode,
-    resetPassword
+    updateProfile: updateProfileMutation.mutateAsync,
+    isUpdatingProfile: updateProfileMutation.isPending,
+    updateProfileError: updateProfileMutation.error as AxiosError,
+    
+    requestPasswordUpdate: passwordRequestMutation.mutateAsync,
+    verifyPasswordUpdateCode: passwordVerifyMutation.mutateAsync,
+    updatePassword: passwordUpdateMutation.mutateAsync,
+
+    passwordResetRequest: passwordResetRequestMutation.mutateAsync,
+    isRequestingCode: passwordRequestMutation.isPending,
+    requestError: passwordRequestMutation.error as AxiosError,
+
+    verifyResetCode: verifyResetCodeMutation.mutateAsync,isVerifyingCode: verifyResetCodeMutation.isPending,
+    verifyError: verifyResetCodeMutation.error as AxiosError,
+
+    resetPassword: passwordResetMutation.mutateAsync,
+    isResettingPassword: passwordResetMutation.isPending,
+    resetError: passwordResetMutation.error as AxiosError,
+    
+    forgetPasswordAuthForms: () => {
+      passwordResetRequestMutation.reset();
+      verifyResetCodeMutation.reset();
+      passwordResetMutation.reset();
+    }
   };
 };

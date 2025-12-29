@@ -89,10 +89,11 @@ export interface FilterSectionProps {
   handleStartDateChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   endDate: string;
   handleEndDateChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  minAmount?: number;
+  minAmount?: string | number;
   handleMinAmountChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   selectOptions: Record<string, string>;
   isExpenseFilter: boolean;
+  onReset: () => void;
 }
 
 // export interface Transaction {
@@ -126,7 +127,8 @@ export interface Task {
 
 export interface TaskItemProps {
   task: Task;
-  onToggleComplete: (task: Task) => void;
+  onToggleComplete: (id: string, currentStatus: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export interface TaskListProps {
@@ -137,7 +139,7 @@ export interface TaskListProps {
 
 export interface TransactionFormData {
   amount: number;
-  type: 'income' | 'expense' | null;
+  type: 'income' | 'expense' | "";
   category: string;
   date: Date | null;
   description: string;
@@ -154,9 +156,10 @@ export interface TaskFormData {
 
 export interface AddTaskFormProps {
   onClose: () => void;
-  onSave: (data: TaskFormData) => void;
+  onSuccess: (data: TaskFormData) => void;
   task?: Task | null;
 }
+
 
 // export interface FilterSectionProps {
 

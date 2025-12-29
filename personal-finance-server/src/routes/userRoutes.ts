@@ -7,6 +7,9 @@ const router = Router();
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 
+router.get("/settings", authenticate, userController.getUserSettings);
+router.put("/settings", authenticate, userController.updateUserSettings);
+
 router.get("/profile", authenticate, userController.getUserProfile);
 router.put("/profile", authenticate, userController.updateUserProfile);
 router.get("/dashboard", authenticate, userController.getUserDashboard);

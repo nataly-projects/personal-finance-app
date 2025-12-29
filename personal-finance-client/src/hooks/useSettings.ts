@@ -1,35 +1,43 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store/store';
-import { setNotifications, setOutcomeLimit } from '../store/settingsSlice';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../services/api';
 
+interface UserSettings {
+  enableOutcomeAlert: boolean;
+  monthlyOutcomeLimit: number;
+}
+
 export const useSettings = () => {
-  const dispatch = useDispatch();
-  const settings = useSelector((state: RootState) => state.settings);
+  const queryClient = useQueryClient();
 
-  const updateNotifications = async (enabled: boolean) => {
-    try {
-      await API.put('/users/settings', { notifications: enabled });
-      dispatch(setNotifications(enabled));
-    } catch (error) {
-      console.error('Error updating notifications settings:', error);
-      throw error;
-    }
-  };
+  const { data: settings, isLoading: isInitialLoading, error } = useQuery<UserSettings>({
+    queryKey: ['settings'],
+    queryFn: async () => {
+    const { data } = await API.get<{ success: boolean; settings: UserSettings }>('/users/settings');      
+    return data.settings;
+    },
+    placeholderData: (previousData) => previousData,
+  });
 
-  const updateOutcomeLimit = async (limit: number | '') => {
-    try {
-      await API.put('/users/settings', { outcomeLimit: limit });
-      dispatch(setOutcomeLimit(limit));
-    } catch (error) {
-      console.error('Error updating outcome limit:', error);
-      throw error;
-    }
-  };
+  const mutation = useMutation({
+    mutationFn: async (updates: Partial<UserSettings>) => {
+      const { data } = await API.put('/users/settings', updates);
+      return data;
+    },
+   
+    onSuccess: (updatedSettings) => {
+      console.log('updatedSettings', updatedSettings);
+      queryClient.setQueryData(['settings'], updatedSettings);
+    },
+  });
 
   return {
     settings,
-    updateNotifications,
-    updateOutcomeLimit,
+    isInitialLoading,
+    isUpdating: mutation.isPending,
+    error,
+    updateSettings: mutation.mutateAsync,
+    updateNotifications: (enabled: boolean) => mutation.mutateAsync({ enableOutcomeAlert: enabled }),
+    updateOutcomeLimit: (limit: number | '') => 
+      mutation.mutateAsync({ monthlyOutcomeLimit: limit === '' ? 0 : limit }),
   };
 }; 

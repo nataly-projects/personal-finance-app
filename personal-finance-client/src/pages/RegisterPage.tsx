@@ -38,7 +38,8 @@ const RegisterPage: React.FC<{ setIsLoginPage: (isLogin: boolean) => void }> = (
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const result = await register(data.email, data.password, data.fullName);
+      // const result = await register(data.email, data.password, data.fullName);
+      const result = await register(data);
       if (result.success) {
         navigate('/', { replace: true });
       } else {

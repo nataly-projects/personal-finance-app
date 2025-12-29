@@ -28,12 +28,8 @@ import { logger } from '../utils/logger';
 import { asyncHandler } from '../middleware/errorMiddleware';
 import { getDashboardData } from '../services/dashboardService';
 import { ApiError } from '../utils/utils';
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-  };
-}
+import { AuthenticatedRequest } from '../utils/types';
+
 
 export const register = asyncHandler(async (req: Request<{}, {}, RegisterRequest>, res: Response<RegisterResponse>) => {
   const { email, password, fullName } = req.body;
@@ -257,12 +253,12 @@ export const requestPasswordUpdate = asyncHandler(async (req: AuthenticatedReque
 export const verifyPasswordUpdateCode = asyncHandler(async (req: AuthenticatedRequest, res: Response<VerifyPasswordUpdateResponse>) => {
   const userId = req.user.id;
   const { code } = req.body;
-    
+
   const user = await User.findOne({ 
-    userId, 
-    resetCode: code,
-    resetCodeExpiry: { $gt: new Date()} 
-    });
+    _id: userId, 
+    'passwordUpdateCode.code': code,
+    'passwordUpdateCode.expiresAt': { $gt: new Date() }
+  });
     
   if (!user) {
     logger.warn(`Code verification failed: User with ID ${userId} not found or Invalid code`);
@@ -275,33 +271,24 @@ export const verifyPasswordUpdateCode = asyncHandler(async (req: AuthenticatedRe
 
 
 export const updatePassword = asyncHandler(async (req: AuthenticatedRequest, res: Response<UpdatePasswordResponse>) => {
-    const { currentPassword, newPassword, verificationCode } = req.body;
+    const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
-
     const user = await User.findById(userId);
     
     if (!user){
       logger.warn(`Password update failed: User with ID ${userId} not found`);
       throw new ApiError(404, "User not found");
     } 
-
+    
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       logger.warn(`Password update failed: Invalid current password for user ID ${userId}`);
       throw new ApiError(401, "Current password is incorrect");
     } 
 
-    // if (!user.passwordUpdateCode || 
-    //     user.passwordUpdateCode.code !== verificationCode || 
-    //     user.passwordUpdateCode.expiresAt < new Date()) {
     if(!user.passwordUpdateCode || !user.passwordUpdateCode.code || !user.passwordUpdateCode.expiresAt) {
         logger.warn(`Password update failed: No password update request found for user ID ${userId}`);
         throw new ApiError(400, "No password update request found");
-    }
-
-    if (user.passwordUpdateCode.code !== verificationCode || user.passwordUpdateCode.expiresAt < new Date()) {
-      logger.warn(`Password update failed: Invalid verification code for user ID ${userId}`);
-      throw new ApiError(400, "Invalid verification code");
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
@@ -346,5 +333,47 @@ export const updateUserProfile = asyncHandler(async (req: AuthenticatedRequest, 
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         }
+    });
+});
+
+export const getUserSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    
+    if (!user){
+      logger.warn(`Settings fetch failed: User with ID ${userId} not found`);
+      throw new ApiError(404, "User not found");
+    } 
+
+    res.json({ 
+        success: true,
+        settings: user.settings
+    });
+});
+
+export const updateUserSettings = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { monthlyOutcomeLimit, enableOutcomeAlert, theme } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    
+    if (!user){
+      logger.warn(`Settings update failed: User with ID ${userId} not found`);
+      throw new ApiError(404, "User not found");
+    } 
+
+    user.settings = {
+        monthlyOutcomeLimit: monthlyOutcomeLimit !== undefined ? monthlyOutcomeLimit : user.settings?.monthlyOutcomeLimit,
+        enableOutcomeAlert: enableOutcomeAlert !== undefined ? enableOutcomeAlert : user.settings?.enableOutcomeAlert,
+        theme: theme || user.settings?.theme || 'light'
+    };
+
+    user.updatedAt = new Date();
+    await user.save();
+
+    res.json({ 
+        success: true,
+        settings: user.settings
     });
 });

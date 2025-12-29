@@ -13,6 +13,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  useTheme as useMuiTheme,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -24,42 +25,50 @@ import {
   Settings as SettingsIcon,
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
+  Logout as LogoutIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 
 const drawerWidth = 240;
 
+const menuItems = [
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+  { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
+  { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
+  { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+  { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
+  { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+];
+
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const muiTheme = useMuiTheme();
+  const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
 
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar 
         position="fixed" 
-        sx={{
-          width: open ? `calc(100% - ${drawerWidth}px)` : '100%',
-          ml: open ? `${drawerWidth}px` : 0,
-          transition: (theme) => theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
+       sx={{
+          zIndex: muiTheme.zIndex.drawer + 1, 
+          transition: muiTheme.transitions.create(['margin', 'width'], {
+            easing: muiTheme.transitions.easing.sharp,
+            duration: muiTheme.transitions.duration.leavingScreen,
           }),
           ...(open && {
-            transition: (theme) => theme.transitions.create(['margin', 'width'], {
-              easing: theme.transitions.easing.easeOut,
-              duration: theme.transitions.duration.enteringScreen,
+            width: `calc(100% - ${drawerWidth}px)`,
+            ml: `${drawerWidth}px`,
+            transition: muiTheme.transitions.create(['margin', 'width'], {
+              easing: muiTheme.transitions.easing.easeOut,
+              duration: muiTheme.transitions.duration.enteringScreen,
             }),
           }),
         }}
@@ -74,21 +83,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Box sx={{display: 'flex', alignItems: 'basline', justifyContent: 'space-between', flexGrow: 1}}>
-            <Typography variant="h6" noWrap component="div">
-              Personal Finance Management
-            </Typography>
-          </Box>
+
+         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            Personal Finance
+          </Typography>
+
           <IconButton color="inherit" onClick={toggleTheme} sx={{ mr: 2 }}>
             {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
+
           {user?.fullName && (  
-            <Typography variant="body1" noWrap>
+            <Typography variant="body1" noWrap sx={{ fontWeight: 500 }}>
               {user.fullName}
             </Typography>
           )}
         </Toolbar>
       </AppBar>
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -115,61 +126,70 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <ChevronLeftIcon />
           </IconButton>
         </Box>
+
         <Divider />
-        <List>
+
+        <List sx={{ flexGrow: 1 }}>
           {menuItems.map((item) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => navigate(item.path)}
+                sx={{
+                  '&.Mui-selected': {
+                    borderRight: `4px solid ${muiTheme.palette.primary.main}`,
+                  }
+                }}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
+                  {item.icon}
+                </ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
+
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={logout} sx={{ color: 'error.main' }}>
+              <ListItemIcon sx={{ color: 'error.main' }}>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItemButton>
+          </ListItem>
+        </List>
       </Drawer>
+
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          padding: (theme) => theme.spacing(3),
-          transition: (theme) => theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
+          p: 3,
+          minHeight: '100vh',
+          backgroundColor: isDarkMode ? 'background.default' : '#f5f5f5',
+          transition: muiTheme.transitions.create('margin', {
+            easing: muiTheme.transitions.easing.sharp,
+            duration: muiTheme.transitions.duration.leavingScreen,
           }),
           marginLeft: `-${drawerWidth}px`,
           ...(open && {
-            transition: (theme) => theme.transitions.create('margin', {
-              easing: theme.transitions.easing.easeOut,
-              duration: theme.transitions.duration.enteringScreen,
+            transition: muiTheme.transitions.create('margin', {
+              easing: muiTheme.transitions.easing.easeOut,
+              duration: muiTheme.transitions.duration.enteringScreen,
             }),
             marginLeft: 0,
           }),
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: (theme) => theme.spacing(0, 1),
-            ...(theme) => theme.mixins.toolbar,
-            justifyContent: 'flex-end',
-          }}
-        />
+        <Box sx={{ ...muiTheme.mixins.toolbar }} />
         {children}
       </Box>
     </Box>
   );
 };
 
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
-  { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
-  { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-  { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
-];
 
 export default Layout; 

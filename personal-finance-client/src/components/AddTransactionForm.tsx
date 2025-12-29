@@ -7,6 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { AddTransactionFormProps, TransactionFormData } from '../utils/types.js';
 import {useCategories} from "../hooks/useCategories";
 import { Category } from '../utils/types';
+import { useTransactions } from '../hooks/useTransactions';
 
 const transactionSchema = yup.object().shape({
   amount: yup.number().required("Amount is required").positive("Amount must be positive"),
@@ -16,11 +17,12 @@ const transactionSchema = yup.object().shape({
   description: yup.string().default("").required("Description is required"),
 });
 
-const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, handleClose, transaction }) => {
+const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ handleClose, transaction }) => {
   const { categories, loading: categoriesLoading, error: categoriesError, addCategory } = useCategories(); 
+  const { addTransaction, updateTransaction, isAdding, isUpdating } = useTransactions();
   const [isCustomCategory, setIsCustomCategory] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
 
   const {
     register,
@@ -34,7 +36,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
     defaultValues: {
       amount: 0,
       category: "",
-      type: null,
+      type: "",
       date: null,
       description: "",
     },
@@ -54,9 +56,10 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
     }
   }, [transaction, setValue]);
 
+  const isPending = isAdding || isUpdating;
+
   const onSubmit: SubmitHandler<TransactionFormData> = async (data) => {
     try {
-      setIsSubmitting(true);
       if (categories.some(cat => cat.name === data.category) && isCustomCategory) {
         setError("Invalid new category. Please enter another category.");
         return;
@@ -66,17 +69,15 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
         addCategory({ name: data.category }); 
       }
 
-      if (onSuccess) {
-        onSuccess(data);
+      if (transaction) {
+        await updateTransaction({id: transaction._id, updatedData: data});
+      } else {
+        await addTransaction(data);
       }
       setError(null);
       reset();
     } catch (err) {
-      console.error("Error adding transaction:", err);
-      setError("Failed to add transaction. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } 
   };
 
   const handleCancel = () => {
@@ -197,16 +198,16 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({ onSuccess, hand
           type="submit" 
           variant="contained" 
           color="primary" 
-          disabled={isSubmitting}
+          disabled={isPending}
         >
-          {isSubmitting ? "Saving..." : transaction ? "Update Transaction" : "Add Transaction"}
+          {isPending ? "Saving..." : transaction ? "Update Transaction" : "Add Transaction"}
         </Button>
         
         <Button 
           variant="contained" 
           color="secondary" 
           onClick={handleCancel} 
-          disabled={isSubmitting}
+          disabled={isPending}
         >
           Cancel
         </Button>

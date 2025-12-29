@@ -27,7 +27,6 @@ declare global {
   }
 }
 
-// export type AuthenticatedRequest = Request;
 export interface AuthenticatedRequest extends Request {
   user: {
     id: string;

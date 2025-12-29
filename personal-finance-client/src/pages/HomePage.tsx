@@ -1,42 +1,36 @@
-import React, { useEffect } from "react";
-import { Box, Typography, Dialog, DialogContent } from "@mui/material";
+import React from "react";
+import { Box, Typography, Dialog, DialogContent, Button } from "@mui/material";
 import Dashboard from "./Dashboard";
 import AddTransactionForm from "../components/AddTransactionForm";
-import API from "../services/api";
 import { useModal } from "../hooks/useModal";
+import { useQueryClient } from '@tanstack/react-query';
+import AddIcon from '@mui/icons-material/Add';
 
 const HomePage: React.FC = () => {
-  const [transactions, setTransactions] = React.useState([]);
   const { isOpen, openModal, closeModal } = useModal();
+  const queryClient = useQueryClient();
 
-  const fetchTransactions = async () => {
-    try {
-      const response = await API.get("/transactions");
-      setTransactions(response.data);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    }
+  const handleSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    closeModal();
   };
-  
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
-        Personal Finance Dashboard
-      </Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+          Welcome Back
+        </Typography>
+        <Button variant="contained" onClick={openModal} startIcon={<AddIcon />}>
+          Add Transaction
+        </Button>
+      </Box>
+
       <Dashboard />
+
       <Dialog open={isOpen} onClose={closeModal} fullWidth maxWidth="sm">
         <DialogContent>
-          <AddTransactionForm
-            onSuccess={() => {
-              fetchTransactions(); 
-              closeModal(); 
-            }}
-            handleClose={closeModal}
-          />
+          <AddTransactionForm onSuccess={handleSuccess} handleClose={closeModal} />
         </DialogContent>
       </Dialog>
     </Box>

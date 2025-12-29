@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const CategoryPieChart: React.FC<{ data: any[] }> = ({ data }) => (
-  <Grid item xs={12} md={4}>
+  <Grid item xs={12} md={6}>
     <Paper sx={{ p: 2, height: 400 }}>
       <Typography variant="h6" gutterBottom>Expenses by Category</Typography>
       <ResponsiveContainer width="100%" height="100%">
