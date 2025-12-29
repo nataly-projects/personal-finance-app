@@ -12,32 +12,28 @@ A comprehensive web application designed to help users manage their personal fin
 - Monitor task completion status and progress
 - Never miss important financial tasks
 
-
 ### **📊 Data Visualization & Analytics**
-- View spending patterns through charts and graphs to better understand financial habits
+- Dynamic Charts: Built with Recharts to visualize spending patterns.
+- Comprehensive monthly and yearly reports to monitor financial habits over time.
 
-### **🎯 Budget Management**
-- Set and track monthly spending limits
-- Get notified when approaching budget limits
+### **🎯 Budget & Settings**
+- Smart Limits: Set monthly spending limits and track progress in real-time.
+- Theme Support: Fully integrated Dark/Light mode, managed via Redux Toolkit and persistent across sessions.
+- Custom Notifications: Toggle email alerts for budget milestones and task deadlines.
 
-### **📧 Email Services**
-- Secure password reset via email
-- Email alerts for important financial events
-- Automated monthly financial summary emails
 
 ### **🔐 Security & Authentication**
-- Authentication: User authentication is managed via JSON Web Tokens (JWT) to ensure secure access to the application
-- Environment Variables: Sensitive information such as database connection strings and secret keys are stored in environment variables using the dotenv package to keep credentials secure
-- User Registration & Login: Secure sign-up and sign-in flow with validation and session management
-- Password Management: Secure password reset and update flows with email verification
+- Secure Access: Managed via JSON Web Tokens (JWT).
+- Password Management: Secure reset flows with email verification via Nodemailer.
+- Environment Safety: Sensitive credentials stored securely using dotenv.
 
 
 ## **Technologies Used**
 
 ### **Frontend**
-- **Language:** TypeScript
-- **Framework:** React
-- **State Management:** Redux Toolkit
+- **Framework:** React with TypeScript.
+- **Server State:** React Query – managing all API interactions, caching, and loading states.
+- **Client State:** Redux Toolkit – managing global UI states like themes.
 - **UI Library:** Material UI
 - **Form Validation:** react-hook-form, yup
 - **HTTP Client:** Axios
@@ -45,13 +41,13 @@ A comprehensive web application designed to help users manage their personal fin
 - **Charts:** Recharts for data visualization
 
 ### **Backend**
-- **Language:** TypeScript
-- **Framework:** Node.js with Express.js
+- **Environment:** Node.js with Express.js & TypeScript.
 - **Database:** MongoDB with Mongoose
 - **Authentication:** JSON Web Token (JWT)
 - **Environment Variables:** dotenv
 - **Logging:** Winston
 - **Email Service:** Nodemailer
+- **Centralized Error Handling:** Custom `ApiError` class and an `asyncHandler` wrapper to eliminate try-catch boilerplate.
 
 ## Installation
 ### Prerequisites
